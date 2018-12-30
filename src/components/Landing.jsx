@@ -8,25 +8,25 @@ const Container = styled.div`
     background: ${props => `url(${props.background}) center center no-repeat`};
     background-size: cover;
     width: 100vw;
-    height: auto;
+    height: 90vh;
     transition: background-image 1s linear;
 `;
 
 const elts = [{
-    text: 'Item 1',
-    img: 'https://images.unsplash.com/photo-1543363127-e668c16b7b91?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1525&q=80'
+    text: 'Bowling @ Bel-Mark Lanes',
+    img: 'https://images.unsplash.com/photo-1466112928291-0903b80a9466?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1000&h=600&fit=crop&ixid=eyJhcHBfaWQiOjF9'
 }, {
-    text: 'Item 2',
-    img: 'https://images.unsplash.com/photo-1546004715-83fb90207b45?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1582&q=80'
+    text: 'Cider Mill Trip',
+    img: 'https://images.unsplash.com/photo-1481214110143-ed630356e1bb?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1000&h=600&fit=crop&ixid=eyJhcHBfaWQiOjF9'
 }, {
-    text: 'Item 3',
-    img: 'https://images.unsplash.com/photo-1542834759-4db91f2574d8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80'
+    text: 'Pledge Party',
+    img: 'https://images.unsplash.com/photo-1486670082170-b54a98edda89?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1000&h=600&fit=crop&ixid=eyJhcHBfaWQiOjF9'
 }, {
-    text: 'Item 4',
-    img: 'https://images.unsplash.com/photo-1546013842-aa2b116f159c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1567&q=80'
+    text: 'Secret Santa',
+    img: 'https://images.unsplash.com/photo-1529343615935-9e41f4a955d9?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1000&h=600&fit=crop&ixid=eyJhcHBfaWQiOjF9'
 }, {
-    text: 'Item 5',
-    img: 'https://images.unsplash.com/photo-1545990148-6645a15bfee6?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1653&q=80'
+    text: 'Pre-Info Session',
+    img: 'https://images.unsplash.com/photo-1523299430930-662665409fc9?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1000&h=600&fit=crop&ixid=eyJhcHBfaWQiOjF9'
 }];
 
 class Landing extends Component {

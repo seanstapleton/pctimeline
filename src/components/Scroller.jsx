@@ -2,14 +2,14 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 
 const Container = styled.div`
-    width: 30vw;
-    height: calc(100vh - 200px);
-    margin-top: 0;
+    width: 80vw;
+    height: calc(70vh - 200px);
+    margin-top: 10vh;
     overflow: auto;
 `;
 
 const Item = styled.div`
-    font-family: 'Open Sans';
+    font-family: 'Just Another Hand';
     font-size: ${props => props.active ? '4em' : '3em'};
     color: ${props => props.active ? '#fff' : '#555'};
     transition: font-size 0.5s ease-out, line-height 0.5s ease-out;
@@ -41,8 +41,8 @@ class Scroller extends Component {
         this.nodeHeight = elt.childNodes[2].scrollHeight;
 
         elt.style['padding-right'] = '17px';
-        beginningFillerNode.style.height = elt.scrollHeight*2/5 + 'px';
-        endingFillerNode.style.height = elt.scrollHeight*3/5 + 'px';
+        beginningFillerNode.style.height = elt.scrollHeight*3/10 + 'px';
+        endingFillerNode.style.height = elt.scrollHeight*4/10 + 'px';
 
         elt.addEventListener('scroll', this.onScroll);
     }
@@ -71,7 +71,7 @@ class Scroller extends Component {
         const { elts } = this.props;
         const { activeIndex } = this.state;
         return (
-            <div style={{ width: '30vw', marginLeft: '20vw', overflow: 'hidden' }}>
+            <div style={{ width: '80vw', marginLeft: '10vw', overflow: 'hidden' }}>
                 <Container ref={this.containerRef}>
                     <div></div>
                     { elts.map((elt, idx) => (<Item key={idx} active={idx === activeIndex}>{elt.text}</Item>)) }
