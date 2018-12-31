@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 
 const Container = styled.div`
-    width: 80vw;
+    width: 60vw;
     height: calc(70vh - 200px);
     margin-top: 10vh;
     overflow: auto;
@@ -71,7 +71,7 @@ class Scroller extends Component {
         const { elts } = this.props;
         const { activeIndex } = this.state;
         return (
-            <div style={{ width: '80vw', marginLeft: '10vw', overflow: 'hidden' }}>
+            <div style={{ width: '60vw', marginLeft: '10vw', overflow: 'hidden' }}>
                 <Container ref={this.containerRef}>
                     <div></div>
                     { elts.map((elt, idx) => (<Item key={idx} active={idx === activeIndex}>{elt.text}</Item>)) }
