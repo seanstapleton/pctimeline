@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import _ from 'lodash';
 
 const Container = styled.div`
     width: 60vw;
@@ -26,10 +27,10 @@ class Scroller extends Component {
         this.containerRef = React.createRef();
         this.state = {
             activeIndex: 0,
-            scrollHeight: 0
+            scrollHeight: 0,
+            nodeHeight: 40
         }
 
-        this.nodeHeight = 40;
         this.onScroll = this.onScroll.bind(this);
     }
 
@@ -38,11 +39,14 @@ class Scroller extends Component {
         const beginningFillerNode = elt.childNodes[0];
         const endingFillerNode = elt.childNodes[elt.childNodes.length - 1];
 
-        this.nodeHeight = elt.childNodes[2].scrollHeight;
+        global.test = elt.childNodes;
+        const nodeHeight = _.get(elt, 'childNodes[2].scrollHeight') || 40;
+        this.setState({ nodeHeight });
 
         elt.style['padding-right'] = '17px';
-        beginningFillerNode.style.height = elt.scrollHeight*3/10 + 'px';
-        endingFillerNode.style.height = elt.scrollHeight*4/10 + 'px';
+        const fillerHeight = (elt.scrollHeight/2 - nodeHeight);
+        beginningFillerNode.style.height = fillerHeight + 'px';
+        endingFillerNode.style.height = fillerHeight + nodeHeight + 'px';
 
         elt.addEventListener('scroll', this.onScroll);
     }
@@ -57,12 +61,18 @@ class Scroller extends Component {
             elts,
             onScrollStop
         } = this.props;
+        const { nodeHeight } = this.state;
+
         const elt = this.containerRef.current;
-        const activeIndex = Math.min(Math.floor(elt.scrollTop/this.nodeHeight), elts.length - 1);
+        const activeIndex = Math.min(Math.floor(elt.scrollTop/nodeHeight), elts.length - 1);
+        const newNodeHeight = _.get(elt, 'childNodes[2].scrollHeight') || 40;
+
         this.setState({
             activeIndex,
-            scrollHeight: elt.scrollTop
+            scrollHeight: elt.scrollTop,
+            nodeHeight: newNodeHeight
         });
+
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => onScrollStop(activeIndex), 500);
     }
@@ -74,7 +84,7 @@ class Scroller extends Component {
             <div style={{ width: '60vw', marginLeft: '10vw', overflow: 'hidden' }}>
                 <Container ref={this.containerRef}>
                     <div></div>
-                    { elts.map((elt, idx) => (<Item key={idx} active={idx === activeIndex}>{elt.text}</Item>)) }
+                    { elts.map((elt, idx) => (<Item key={idx} active={idx === activeIndex}>{elt.name}</Item>)) }
                     <div></div>
                 </Container>
             </div>

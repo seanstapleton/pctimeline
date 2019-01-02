@@ -1,0 +1,63 @@
+#!/usr/bin/env node
+
+const debug = require('debug')('pctimeline:server');
+const http = require('http');
+const db = require('../db');
+
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', () => {
+  console.log('Mongo Database Connected');
+});
+
+const app = require('../app')(db);
+
+// normalize port into a number, string, or false
+const normalizePort = (val) => {
+  const port = parseInt(val, 10);
+  if (isNaN(port)) return val; // eslint-disable-line no-restricted-globals
+  if (port >= 0) return port;
+  return false;
+};
+
+// Get port from env and store in Express
+const port = normalizePort(process.env.PORT || '5000');
+app.set('port', port);
+
+// event listener for error event
+const onError = (error) => {
+  if (error.syscall !== 'listen') throw error;
+
+  const bind = typeof port === 'string'
+    ? `Pipe ${port}`
+    : `Port ${port}`;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(`${bind} requires elevated privileges`);
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(`${bind} is already in use`);
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+};
+
+// create server and listen on port
+const server = http.createServer(app);
+server.listen(port);
+server.on('error', onError);
+
+// event listener for listening event
+const onListening = () => {
+  const addr = server.address();
+  const bind = typeof addr === 'string'
+    ? `pipe ${addr}`
+    : `port ${addr.port}`;
+  debug(`Listening on ${bind}`);
+};
+
+server.on('listening', onListening);
