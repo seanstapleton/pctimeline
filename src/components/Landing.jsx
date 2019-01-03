@@ -10,7 +10,7 @@ const Container = styled.div`
     background: ${props => `url(${props.background}) center center no-repeat`};
     background-size: cover;
     width: 100vw;
-    height: 90vh;
+    height: 80vh;
     transition: background-image 1s linear;
 `;
 

@@ -4,7 +4,7 @@ import _ from 'lodash';
 
 const Container = styled.div`
     width: 60vw;
-    height: calc(70vh - 200px);
+    height: calc(60vh - 200px);
     margin-top: 10vh;
     overflow: auto;
 `;

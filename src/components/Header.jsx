@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 
 const Container = styled.div`
     padding: 10px;
-    opacity: 0.8;
     overflow: auto;
 `;
 const Logo = styled.h1`
@@ -13,28 +13,37 @@ const Logo = styled.h1`
     padding: 0 20px;
     color: #fff;
     float: left;
+    & a {
+        text-decoration: none;
+        color: ${props => props.textColor || '#fff'};
+    }
 `;
-const LinkContainer = styled.ul`
+const NavLinkContainer = styled.ul`
     list-style-type: none;
     float: right;
     padding: 0 20px;
 `;
-const Link = styled.li`
+const NavLink = styled.li`
     font-size: 1.5em;
     font-family: 'Open Sans';
     font-weight: 200;
     float: left;
-    color: #fff;
+    & a {
+        text-decoration: none;
+        color: ${props => props.textColor || '#fff'};
+    }
 `;
 
 class Header extends Component {
   render() {
+    const { textColor } = this.props;
+
     return (
       <Container className="header">
-        <Logo>ΦΧΘ Timeline</Logo>
-        <LinkContainer>
-            <Link>Upload</Link>
-        </LinkContainer>
+        <Logo textColor={textColor}><Link to='/'>ΦΧΘ Timeline</Link></Logo>
+        <NavLinkContainer>
+            <NavLink textColor={textColor}><Link to='/upload'>Upload</Link></NavLink>
+        </NavLinkContainer>
       </Container>
     );
   }
