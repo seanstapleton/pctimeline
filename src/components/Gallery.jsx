@@ -14,6 +14,42 @@ const Image = styled.img`
         margin-left: 15px;
     }
 `;
+const Timeline = styled.div`
+    width: 40px;
+    height: 200px;
+    float: left;
+    & span {
+        display: block;
+
+        &:nth-of-type(1) {
+            width: 1px;
+            margin-left: 19.5px;
+            height: 20px;
+            background-color: #ddd;
+        }
+        &:nth-of-type(2) {
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            border-radius: 50%;
+            background-color: #ddd;
+        }
+        &:nth-of-type(3) {
+            width: 1px;
+            margin-left: 19.5px;
+            height: 100px;
+            background-color: #ddd;
+        }
+    }
+`;
+
+const GalleryTitle = styled.h2`
+    color: #ddd;
+    margin-top: 0.75em;
+    margin-bottom: 20px;
+    padding-left: 55px;
+    font-family: 'Just Another Hand';
+`;
 
 class Gallery extends Component {
     constructor(props) {
@@ -46,13 +82,16 @@ class Gallery extends Component {
             lightboxIndex,
             lightboxOpen
         } = this.state;
-        const { images } = this.props;
+        const {
+            galleryName,
+            images
+        } = this.props;
         return (
-            <div style={{ padding: 40 }}>
+            <div style={{ padding: 60 }}>
                 <ReactPhotoGallery
-                        photos={images}
-                        ImageComponent={(elt, idx) => <Image src={elt.photo.src} onClick={() => this.onThumbnailClick(elt.index)} />}
-                    />
+                    photos={images}
+                    ImageComponent={(elt, idx) => <Image src={elt.photo.src} onClick={() => this.onThumbnailClick(elt.index)} />}
+                />
                 <PhotoSwipe isOpen={lightboxOpen} options={{ index: lightboxIndex }} items={images} onClose={this.onLightboxClose} />
             </div>
         );

@@ -45,11 +45,11 @@ class App extends Component {
       galleries,
       images
     } = this.state;
-
+    const activeGalleryName = _.get(galleries, `[${activeGallery}].name`);
     return (
       <div className="App">
         <Landing galleries={galleries} activeGallery={activeGallery} updateActiveGallery={this.updateActiveGallery} />
-        <Gallery images={images} />
+        <Gallery images={images} galleryName={activeGalleryName} />
       </div>
     );
   }

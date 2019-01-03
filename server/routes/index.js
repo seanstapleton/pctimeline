@@ -14,9 +14,11 @@ module.exports = (db) => {
     const galleries = [];
 
     for (const folder of folders) {
-      const images = await dbx.filesListFolder({ path: folder.path_lower });
-      const headerImg = _.find(images.entries, entry => entry['.tag'] === 'file');
-      const headerImgSrc = await dbx.filesGetTemporaryLink({ path: headerImg.path_lower });
+      const files = await dbx.filesListFolder({ path: folder.path_lower });
+      const images = _.filter(files.entries, entry => entry['.tag'] === 'file');
+      let headerImage = images[0];
+      headerImage = _.find(images,  image => image.name === 'header.jpg') || headerImage;
+      const headerImgSrc = await dbx.filesGetTemporaryLink({ path: headerImage.path_lower });
       const formattedFolder = _.pick(folder, ['name', 'path_lower']);
       formattedFolder.header = headerImgSrc.link;
       galleries.push(formattedFolder);
