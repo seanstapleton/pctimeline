@@ -4,6 +4,7 @@ import Dropzone from 'react-dropzone';
 import styled from 'styled-components';
 import axios from 'axios';
 import _ from 'lodash';
+import Swal from 'sweetalert2'
 
 import Header from './Header';
 
@@ -14,6 +15,9 @@ const ImageDropzoneContainer = styled.div`
     background-color: #ddd;
     opacity: 0.98;
     border-radius: 5px;
+    & *:focus {
+        outline: 0;
+    }
 `;
 const ImagePreviewWindow = styled.div`
     background-color: #eee;
@@ -41,6 +45,7 @@ const QueueActionsContainer = styled.div`
         font-family: 'Open Sans';
         font-weight: 200;
         background-color: #B180E8;
+        cursor: pointer;
     }
     & button:nth-of-type(2) {
         background-color: #FF5F5E;
@@ -72,6 +77,7 @@ const UploadForm = styled.div`
         border-radius: 5px;
         width: 200px;
         margin-left: 10px;
+        cursor: pointer;
     }
 `;
 
@@ -79,16 +85,53 @@ class UploadPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            chosenGallery:  '',
             galleries: [],
             images: []
         };
-        this.onDrop =  this.onDrop.bind(this);
+        this.onDrop = this.onDrop.bind(this);
+        this.onSelectChange = this.onSelectChange.bind(this);
+        this.onSubmit = this.onSubmit.bind(this);
     }
 
     async componentDidMount() {
         const response = await axios.get('/galleries');
         const galleries = response.data;
-        this.setState({ galleries });
+        this.setState({
+            chosenGallery: galleries[0].name,
+            galleries
+        });
+    }
+
+    onSelectChange(e) {
+        console.log('value', e.target.value);
+        this.setState({ chosenGallery: e.target.value });
+    }
+
+    async onSubmit() {
+        const {
+            chosenGallery,
+            images
+        } = this.state;
+        const imageData = new FormData();
+        _.forEach(images, (image, idx) => {
+            const file = image.file;
+            imageData.append(file.name, file);
+        });
+        const response = await axios.post(`/photos/${chosenGallery}`, imageData);
+        if (response.data.success) {
+            await Swal({
+                title: 'Success!',
+                type: 'success'
+            });
+            this.setState({ images: [] });
+        } else {
+            await Swal({
+                title: 'Error',
+                text: response.data.err,
+                type: 'error'
+            });
+        }
     }
 
     onDrop(newImages) {
@@ -116,6 +159,7 @@ class UploadPage extends Component {
 
     render() {
         const {
+            chosenGallery,
             galleries,
             images
         } = this.state;
@@ -138,13 +182,13 @@ class UploadPage extends Component {
                                 }
                             </ImagePreviewWindow>
                             <UploadForm>
-                                <select required>
-                                    <option selected disabled>Select Event</option>
+                                <select value={chosenGallery} onChange={this.onSelectChange} required>
+                                    <option value='n/a' selected disabled>Select Event</option>
                                     { _.map(galleries, gallery => (
-                                        <option value={gallery.path_lower}>{gallery.name}</option>
+                                        <option value={gallery.name}>{gallery.name}</option>
                                     ))}
                                 </select>
-                                <button>Upload Images</button>
+                                <button onClick={this.onSubmit}>Upload Images</button>
                             </UploadForm>
                         </ImageDropzoneContainer>
                     )}

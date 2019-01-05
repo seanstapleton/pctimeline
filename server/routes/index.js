@@ -2,7 +2,9 @@ const express = require('express');
 const Dropbox = require('dropbox').Dropbox;
 const fetch = require('isomorphic-fetch');
 const _ = require('lodash');
-const requestImageSize = require('request-image-size');
+const multiparty = require('multiparty');
+const fs = require('fs');
+const sizeOf = require('image-size');
 
 const dbx = new Dropbox({ accessToken: 'b31IOz_iVoAAAAAAAAAAwkfekfZhZ0jq9U_zThq1v0TbCGoOMpIiKRPExvgO4kQJ', fetch: fetch });
 const router = express.Router();
@@ -45,6 +47,33 @@ module.exports = (db) => {
       };
     });
     res.send(sourceLinks);
+  });
+
+  router.post('/photos/:id', async (req, res) => {
+    const path = `/galleries/${req.params.id}`;
+    const form = new multiparty.Form();
+    let files;
+    form.parse(req, async (err, fields, filesIn) => {
+      if (err) {
+        return res.send({ success: false, err });
+      }
+      const files = _.values(filesIn);
+      console.log(files);
+      for (const file of files) {
+        try {
+          const fileData = fs.readFileSync(file[0].path);
+          const { width, height } = sizeOf(file[0].path);
+          const imageName = file[0].originalFilename.toLowerCase().match(/.+(?=.(jpg|jpeg|png))/g)[0];
+          const fileExtensionRegEx = new RegExp(`(?<=${imageName}\.).+`, 'g');
+          const fileExtension = file[0].originalFilename.toLowerCase().match(fileExtensionRegEx)[0];
+          const filePath = `${path}/${imageName}_${width}x${height}.${fileExtension}`;
+          await dbx.filesUpload({ path: filePath, contents: fileData });
+        } catch (err) {
+          console.log(err);
+        }
+      }
+      return res.send({ success: true });
+    });
   });
 
   return router;
