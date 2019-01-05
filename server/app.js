@@ -28,9 +28,9 @@ module.exports = (db) => {
   app.use(flash());
 
   app.use('/backendServices', routes(db));
-  app.get('*', (req, res) => {
-    res.sendFile(`${__dirname}/../build/index.html`);
-  });
+  // app.get('*', (req, res) => {
+  //   res.sendFile(`${__dirname}/../build/index.html`);
+  // });
   app.use('/public', express.static(`${__dirname}/public`));
 
   return app;

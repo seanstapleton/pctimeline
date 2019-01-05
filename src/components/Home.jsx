@@ -67,10 +67,15 @@ class Home extends Component {
         this.setState({ activeGallery });
         const { galleries } = this.state;
         const activeGalleryName = galleries[activeGallery].name;
+        this.setState({
+            allImagesLoaded: false,
+            images: []
+        });
         if (activeGalleryName) {
             const response = await axios.get(`/photos/${activeGalleryName}`);
             const images = _.map(response.data, image => ({
                 src: image.src,
+                thumbnail: image.thumbnail,
                 w: image.width,
                 h: image.height
             }));

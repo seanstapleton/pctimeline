@@ -51,6 +51,7 @@ class Gallery extends Component {
             incrementNumLoadedImages,
             images
         } = this.props;
+        console.log(images);
         return (
             <div style={{ padding: 20 }}>
                 { allImagesLoaded
@@ -62,7 +63,7 @@ class Gallery extends Component {
                         photos={images}
                         ImageComponent={(elt, idx) => (
                             <Image 
-                                src={elt.photo.src}
+                                src={elt.photo.thumbnail}
                                 onClick={() => this.onThumbnailClick(elt.index)}
                                 onLoad={() => {
                                     if (!allImagesLoaded) incrementNumLoadedImages(elt)
