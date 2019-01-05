@@ -17,7 +17,6 @@ module.exports = (db) => {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(cookieParser());
-  app.use(express.static(path.join(__dirname, 'public')));
 
   // Passport Configuration
   app.use(session({
@@ -27,7 +26,7 @@ module.exports = (db) => {
   }));
   app.use(flash());
 
-  app.use(express.static(path.join(__dirname, 'build')));
+  app.use('/build', express.static(path.join(__dirname, 'build')));
   app.use('/backendServices', routes(db));
   app.get('/*', function(req, res) {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
