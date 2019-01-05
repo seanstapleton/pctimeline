@@ -36,7 +36,8 @@
     "sweetalert2": "^7.33.1"
   },
   "scripts": {
-    "start": "node server/bin/www"
+    "start": "node bin/www",
+    "heroku-postbuild": "npm install && npm run build"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -46,6 +47,5 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ],
-  "proxy": "http://localhost:5000/backendServices/"
+  ]
 }

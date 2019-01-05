@@ -95,7 +95,7 @@ class UploadPage extends Component {
     }
 
     async componentDidMount() {
-        const response = await axios.get('/galleries');
+        const response = await axios.get('/backendServices/galleries');
         const galleries = response.data;
         this.setState({
             chosenGallery: galleries[0].name,
@@ -118,7 +118,7 @@ class UploadPage extends Component {
             const file = image.file;
             imageData.append(file.name, file);
         });
-        const response = await axios.post(`/photos/${chosenGallery}`, imageData);
+        const response = await axios.post(`/backendServices/photos/${chosenGallery}`, imageData);
         if (response.data.success) {
             await Swal({
                 title: 'Success!',

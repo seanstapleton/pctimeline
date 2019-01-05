@@ -53,7 +53,7 @@ class Home extends Component {
     }
 
     async componentDidMount() {
-        const response = await axios.get('/galleries');
+        const response = await axios.get('/backendServices/galleries');
         const galleries = response.data;
         this.setState({ galleries });
         await this.updateActiveGallery(0);
@@ -72,7 +72,7 @@ class Home extends Component {
             images: []
         });
         if (activeGalleryName) {
-            const response = await axios.get(`/photos/${activeGalleryName}`);
+            const response = await axios.get(`/backendServices/photos/${activeGalleryName}`);
             const images = _.map(response.data, image => ({
                 src: image.src,
                 thumbnail: image.thumbnail,

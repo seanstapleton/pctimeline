@@ -27,11 +27,11 @@ module.exports = (db) => {
   }));
   app.use(flash());
 
+  app.use(express.static(path.join(__dirname, 'build')));
   app.use('/backendServices', routes(db));
-  // app.get('*', (req, res) => {
-  //   res.sendFile(`${__dirname}/../build/index.html`);
-  // });
-  app.use('/public', express.static(`${__dirname}/public`));
+  app.get('/*', function(req, res) {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  });
 
   return app;
 };
