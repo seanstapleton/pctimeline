@@ -12,6 +12,7 @@ const Container = styled.div`
     width: 100vw;
     height: 80vh;
     transition: background-image 1s linear;
+    -webkit-transition: background-image 1s linear;
 `;
 
 class Landing extends Component {

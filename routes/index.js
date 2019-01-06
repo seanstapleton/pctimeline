@@ -4,7 +4,6 @@ const fetch = require('isomorphic-fetch');
 const _ = require('lodash');
 const multiparty = require('multiparty');
 const fs = require('fs');
-const sizeOf = require('image-size');
 const jimp = require('jimp');
 const tmp = require('tmp');
 
@@ -83,28 +82,29 @@ module.exports = (db) => {
       for (const file of files) {
         try {
           // get file information
-          const fileData = fs.readFileSync(file[0].path);
-          const { width, height } = sizeOf(file[0].path);
+          const fileData = fs.readFileSync(file[0].path);          
+          let image = await jimp.read(file[0].path);
+          const { width, height } = image.bitmap;
           const imageName = file[0].originalFilename.toLowerCase().match(/.+(?=.(jpg|jpeg|png))/g)[0];
           const fileExtensionRegEx = new RegExp(`(?<=${imageName}\.).+`, 'g');
           const fileExtension = file[0].originalFilename.toLowerCase().match(fileExtensionRegEx)[0];
+          let mimeType = (fileExtension === 'jpg') ? 'JPEG' : fileExtension;
+          mimeType = jimp[`MIME_${mimeType.toUpperCase()}`];
 
-          // get dropbox file paths
+          // get dropbox file paths 
           const thumbnailPath = `${path}/thumbnails/${imageName}_${width}x${height}.${fileExtension}`;
           const filePath = `${path}/${imageName}.${fileExtension}`;
 
-          // create thumbnail
-          const image = await jimp.read(file[0].path);
+          // create buffers
           const targetHeight = 400;
           const resizeRatio = targetHeight/height
-          const resized = image.resize(width*resizeRatio, targetHeight);
-          let mimeType = (fileExtension === 'jpg') ? 'JPEG' : fileExtension;
-          mimeType = jimp[`MIME_${mimeType.toUpperCase()}`];
-          const base64thumbnail = await resized.getBufferAsync(mimeType);
+          const imageBuffer = await image.getBufferAsync(mimeType); 
+          const resized = image.scale(resizeRatio);
+          const thumbnailBuffer = await resized.getBufferAsync(mimeType);
           
           // upload photos
-          await dbx.filesUpload({ path: filePath, contents: fileData });
-          await dbx.filesUpload({ path: thumbnailPath, contents: base64thumbnail });
+          await dbx.filesUpload({ path: filePath, contents: imageBuffer });
+          await dbx.filesUpload({ path: thumbnailPath, contents: thumbnailBuffer });
 
         } catch (err) {
           console.log(err);

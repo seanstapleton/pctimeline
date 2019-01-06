@@ -1,16 +1,35 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import ReactPhotoGallery from 'react-photo-gallery';
 import 'react-photoswipe/lib/photoswipe.css';
 import PhotoSwipe from 'react-photoswipe';
 import ReactLoading from 'react-loading';
+import Masonry from 'react-masonry-component';
+import _ from 'lodash';
 
 const Image = styled.img`
-    height: 250px;
+    width: calc(50% - 7.5px);
     margin-bottom: 15px;
     cursor: pointer;
-    &:not(first-child) {
-        margin-left: 15px;
+    margin-right: 0;
+
+    @media (max-width: 768px) {
+        &:not(:nth-child(2n+1)) {
+            margin-right: 15px;
+        }
+    }
+
+    @media (min-width: 768px) {
+        width: calc(33% - 7.5px);
+        &:not(:nth-child(3n+1)) {
+            margin-right: 15px;
+        }
+    }
+`;
+const GridSizer = styled.div`
+    width: calc(50% - 7.5px);
+
+    @media (min-width: 768px) {
+        width: calc(33% - 7.5px);
     }
 `;
 
@@ -58,20 +77,19 @@ class Gallery extends Component {
                     ? null
                     : <LoaderContainer><ReactLoading type='bubbles' color='#222' /></LoaderContainer>
                 }
-                <div style={ allImagesLoaded ? null : { height: 0, overflow: 'hidden' }}>
-                    <ReactPhotoGallery
-                        photos={images}
-                        ImageComponent={(elt, idx) => (
-                            <Image 
-                                src={elt.photo.thumbnail}
-                                onClick={() => this.onThumbnailClick(elt.index)}
-                                onLoad={() => {
-                                    if (!allImagesLoaded) incrementNumLoadedImages(elt)
-                                }}
-                            />
-                        )}
-                    />
-                </div>
+                <Masonry options={{ columnWidth: '.grid-sizer', gutter: 15 }}>
+                    <GridSizer className='grid-sizer'></GridSizer>
+                    { _.map(images, (elt, idx) => (
+                        <Image 
+                            key={idx}
+                            src={elt.thumbnail}
+                            onClick={() => this.onThumbnailClick(idx)}
+                            onLoad={() => {
+                                if (!allImagesLoaded) incrementNumLoadedImages(elt)
+                            }}
+                        />
+                    )) }
+                </Masonry>
                 <PhotoSwipe isOpen={lightboxOpen} options={{ index: lightboxIndex }} items={images} onClose={this.onLightboxClose} />
             </div>
         );

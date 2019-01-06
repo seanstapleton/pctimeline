@@ -2,20 +2,39 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import _ from 'lodash';
 
+const Wrapper = styled.div`
+    width: 80vw;
+    margin-left: 10vw;
+    overflow: hidden;
+
+    @media (min-width: 768px) {
+        width: 60vw;
+    }
+`;
+
 const Container = styled.div`
-    width: 60vw;
-    height: calc(60vh - 200px);
+    width: 80vw;
+    height: calc(80vh - 200px);
     margin-top: 10vh;
     overflow: auto;
+
+    @media (min-width: 768px) {
+        width: 60vw;
+        height: calc(60vh - 200px);
+    }
 `;
 
 const Item = styled.div`
     font-family: 'Just Another Hand';
-    font-size: ${props => props.active ? '4em' : '3em'};
+    font-size: ${props => props.active ? '3em' : '2em'};
     color: ${props => props.active ? '#fff' : '#555'};
     transition: font-size 0.5s ease-out, line-height 0.5s ease-out;
     cursor: ${props => props.active ? 'pointer' : 'cursor'};
     padding: 5px 0;
+
+    @media (min-width: 768px) {
+        font-size: ${props => props.active ? '4em' : '3em'};
+    }
 `;
 
 let scrollTimeout;
@@ -81,13 +100,13 @@ class Scroller extends Component {
         const { elts } = this.props;
         const { activeIndex } = this.state;
         return (
-            <div style={{ width: '60vw', marginLeft: '10vw', overflow: 'hidden' }}>
+            <Wrapper>
                 <Container ref={this.containerRef}>
                     <div></div>
                     { elts.map((elt, idx) => (<Item key={idx} active={idx === activeIndex}>{elt.name}</Item>)) }
                     <div></div>
                 </Container>
-            </div>
+            </Wrapper>
         );
     }
 }

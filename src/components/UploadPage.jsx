@@ -4,12 +4,13 @@ import Dropzone from 'react-dropzone';
 import styled from 'styled-components';
 import axios from 'axios';
 import _ from 'lodash';
-import Swal from 'sweetalert2'
+import Swal from 'sweetalert2';
+import { Line } from 'rc-progress';
 
 import Header from './Header';
 
 const ImageDropzoneContainer = styled.div`
-    width: calc(90% - 20px);
+    width: calc(90% - 40px);
     margin: 5%;
     padding: 20px;
     background-color: #ddd;
@@ -21,25 +22,27 @@ const ImageDropzoneContainer = styled.div`
 `;
 const ImagePreviewWindow = styled.div`
     background-color: #eee;
-    padding: 10px;
+    padding: 20px;
     border-radius: 5px;
     overflow-x: auto;
     min-height: 150px;
+    position: relative;
 `;
 const ImagePreview = styled.img`
-    width: 20%;
+    width: calc(50% - 10px);
     padding: 5px;
     border-radius: 5px;
     float: left;
+    image-orientation: from-image;
 `;
 const QueueActionsContainer = styled.div`
-    width: 410px;
+    width: 100%;
     margin: 0 auto;
     & button {
+        width: 100%;
         padding: 10px;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
         border-radius: 5px;
-        width: 200px;
         border: none;
         color: #fff;
         font-family: 'Open Sans';
@@ -49,22 +52,34 @@ const QueueActionsContainer = styled.div`
     }
     & button:nth-of-type(2) {
         background-color: #FF5F5E;
-        margin-left: 10px;
+    }
+
+    @media (min-width: 768px) {
+        width: 410px;
+        & button {
+            width: 200px;
+        }
+        & button:nth-of-type(2) {
+            margin-left: 10px;
+        }
     }
 `;
 const DropText = styled.p`
     font-family: 'Open Sans';
     font-weight: 200;
     text-align: center;
-    line-height: 100px;
+    margin-top: 50px;
 `;
 const UploadForm = styled.div`
-    width: 410px;
+    width: 100%;
     margin: 10px auto 0 auto;
     & select {
-        width: 200px;
+        width: 100%;
         border: none;
         height:  40px;
+        font-family: 'Open Sans';
+        margin-bottom: 10px;
+        padding: 0 10px;
     }
     & button {
         padding: 10px;
@@ -75,11 +90,31 @@ const UploadForm = styled.div`
         font-weight: 200;
         border: none;
         border-radius: 5px;
-        width: 200px;
-        margin-left: 10px;
+        width: 100%;
         cursor: pointer;
+        &:disabled {
+            background-color: #CBBFDE;
+            color: #ddd;
+        }
+    }
+
+    @media (min-width: 768px) {
+        width: 410px;
+        & select {
+            width: 200px;
+            margin-bottom: 0;
+        }
+        & button {
+            width: 200px;
+            margin-left: 10px;
+        }
     }
 `;
+const loadingBarStyles = {
+    position: 'absolute',
+    top: '0',
+    left: '0'
+};
 
 class UploadPage extends Component {
     constructor(props) {
@@ -87,11 +122,13 @@ class UploadPage extends Component {
         this.state = {
             chosenGallery:  '',
             galleries: [],
-            images: []
+            images: [],
+            loadingProgress: false
         };
         this.onDrop = this.onDrop.bind(this);
         this.onSelectChange = this.onSelectChange.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
+        this.clearFiles = this.clearFiles.bind(this);
     }
 
     async componentDidMount() {
@@ -101,6 +138,10 @@ class UploadPage extends Component {
             chosenGallery: galleries[0].name,
             galleries
         });
+    }
+
+    clearFiles() {
+        this.setState({ images: [] });
     }
 
     onSelectChange(e) {
@@ -118,12 +159,12 @@ class UploadPage extends Component {
             const file = image.file;
             imageData.append(file.name, file);
         });
+        this.setState({ loadingProgress: "0" });
+        setTimeout(() => this.setState({ loadingProgress: "15" }), 500);
         const response = await axios.post(`/backendServices/photos/${chosenGallery}`, imageData);
+        this.setState({ loadingProgress: "100" });
+        setTimeout(() => this.setState({ loadingProgress: false }), 500);
         if (response.data.success) {
-            await Swal({
-                title: 'Success!',
-                type: 'success'
-            });
             this.setState({ images: [] });
         } else {
             await Swal({
@@ -135,7 +176,6 @@ class UploadPage extends Component {
     }
 
     onDrop(newImages) {
-        const imageBinaries = [];
         _.forEach(newImages, (file, idx) => {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -161,7 +201,8 @@ class UploadPage extends Component {
         const {
             chosenGallery,
             galleries,
-            images
+            images,
+            loadingProgress
         } = this.state;
         return (
             <div style={{ height: '100vh', background: 'url(https://dl.dropboxusercontent.com/s/4eu6ifskfc44d0j/collage.jpg) repeat', backgroundSize: 'cover' }}>
@@ -171,10 +212,19 @@ class UploadPage extends Component {
                         <ImageDropzoneContainer className={classNames('dropzone', {'dropzone-active': isDragActive})}>
                             <QueueActionsContainer>
                                 <button {...getRootProps()}>Add files</button>
-                                <button>Clear files</button>
+                                <button onClick={this.clearFiles}>Clear files</button>
                             </QueueActionsContainer>
                             <input {...getInputProps()} />
                             <ImagePreviewWindow {...getRootProps()} onClick={() => {}}>
+                                {
+                                    loadingProgress
+                                        ? ( <Line
+                                            percent={loadingProgress}
+                                            strokeWidth="1"
+                                            strokeColor="#63BCFF"
+                                            style={loadingBarStyles}
+                                        />) : null
+                                }
                                 { 
                                     (images.length === 0)
                                         ? (<DropText>Try dropping some files here or click 'Add files' to select files to upload.</DropText>)
@@ -188,7 +238,7 @@ class UploadPage extends Component {
                                         <option value={gallery.name}>{gallery.name}</option>
                                     ))}
                                 </select>
-                                <button onClick={this.onSubmit}>Upload Images</button>
+                                <button onClick={this.onSubmit} disabled={images.length === 0}>Upload Images</button>
                             </UploadForm>
                         </ImageDropzoneContainer>
                     )}
