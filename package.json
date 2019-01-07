@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.0.17",
     "axios": "^0.18.0",
     "body-parser": "^1.18.3",
     "classnames": "^2.2.6",
@@ -14,6 +15,7 @@
     "exif-parser": "^0.1.12",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
+    "fluent-ffmpeg": "^2.1.2",
     "image-size": "^0.6.3",
     "isomorphic-fetch": "^2.2.1",
     "jimp": "^0.6.0",

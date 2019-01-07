@@ -75,12 +75,18 @@ class Home extends Component {
             });
             if (activeGalleryName) {
                 const response = await axios.get(`/backendServices/photos/${activeGalleryName}`);
-                const images = _.map(response.data, image => ({
-                    src: image.src,
-                    thumbnail: image.thumbnail,
-                    w: image.width,
-                    h: image.height
-                }));
+                const images = _.map(response.data, image => {
+                    const elt = { thumbnail: image.thumbnail };
+                    if (image.movie) {
+                        elt.html = `<div class="wrapper"><div class="video-wrapper"><video width="960" class="pswp__video" src="${image.src}" controls></video></div></div>`;
+                    } else {
+                        elt.src = image.src;
+                        elt.w = image.width;
+                        elt.h = image.height;
+                    }
+                    
+                    return elt;
+                });
                 this.setState({
                     allImagesLoaded: false,
                     images

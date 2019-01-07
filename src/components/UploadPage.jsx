@@ -34,7 +34,40 @@ const ImagePreview = styled.img`
     border-radius: 5px;
     float: left;
     image-orientation: from-image;
+    
+    @media (min-width: 768px) {
+        width: calc(33% - 15px);
+    }
 `;
+const VideoDefault = styled.div`
+    display: block;
+    position: relative;
+    width: calc(50% - 10px);
+    height: 200px;
+    padding: 5px;
+    border-radius: 5px;
+    float: left;
+    background-color: #aec3db;
+    background-image: url(/video.svg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 40%;
+
+    & p {
+        margin: 0;
+        position: absolute;
+        bottom: 5px;
+        font-family: 'Just Another Hand';
+        font-size: 2em;
+        text-align: center;
+        width: calc(100% - 10px);
+    }
+
+    @media (min-width: 768px) {
+        width: calc(33% - 15px);
+    }
+`;
+
 const QueueActionsContainer = styled.div`
     width: 100%;
     margin: 0 auto;
@@ -167,6 +200,7 @@ class UploadPage extends Component {
         if (response.data.success) {
             this.setState({ images: [] });
         } else {
+            console.log(response);
             await Swal({
                 title: 'Error',
                 text: response.data.err,
@@ -228,7 +262,14 @@ class UploadPage extends Component {
                                 { 
                                     (images.length === 0)
                                         ? (<DropText>Try dropping some files here or click 'Add files' to select files to upload.</DropText>)
-                                        : images.map(image => (<ImagePreview src={image.preview} />))
+                                        : _.map(images, image => {
+                                            const { type } = image.file;
+                                            console.log(type);
+                                            if (_.includes(type, 'video')) {
+                                                return (<VideoDefault><p>{image.file.name}</p></VideoDefault>);
+                                            }
+                                            return (<ImagePreview src={image.preview} />)
+                                        })
                                 }
                             </ImagePreviewWindow>
                             <UploadForm>
