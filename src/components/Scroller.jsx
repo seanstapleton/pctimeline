@@ -29,7 +29,7 @@ const Item = styled.div`
     font-size: ${props => props.active ? '3em' : '2em'};
     color: ${props => props.active ? '#fff' : '#555'};
     transition: font-size 0.5s ease-out, line-height 0.5s ease-out;
-    cursor: ${props => props.active ? 'pointer' : 'cursor'};
+    cursor: pointer;
     padding: 5px 0;
 
     @media (min-width: 768px) {
@@ -53,13 +53,11 @@ class Scroller extends Component {
 
         this.onScroll = this.onScroll.bind(this);
         this.onClick = this.onClick.bind(this);
+        this.updateNodeHeights = this.updateNodeHeights.bind(this);
     }
 
-    componentDidMount() {
+    updateNodeHeights() {
         const elt = this.containerRef.current;
-        const beginningFillerNode = elt.childNodes[0];
-        const endingFillerNode = elt.childNodes[elt.childNodes.length - 1];
-
         this.nodeHeights = _.reduce(elt.childNodes, (acc, node, idx) => {
             if (idx <= 1 || idx === elt.childNodes.length - 1) {
                 return acc;
@@ -68,6 +66,14 @@ class Scroller extends Component {
             acc.push(lastNodeHeight + node.scrollHeight);
             return acc;
         }, [0]);
+    }
+
+    componentDidMount() {
+        const elt = this.containerRef.current;
+        const beginningFillerNode = elt.childNodes[0];
+        const endingFillerNode = elt.childNodes[elt.childNodes.length - 1];
+
+        this.updateNodeHeights();
         const nodeHeight = _.last(this.nodeHeights);
 
         elt.style['padding-right'] = '17px';
@@ -83,8 +89,12 @@ class Scroller extends Component {
         elt.removeEventListener('scroll', this.onScroll);
     }
 
-    onClick(elt) {
-        console.log('elt:', elt.target.scrollTop);
+    onClick(idx) {
+        this.updateNodeHeights();
+
+        const elt = this.containerRef.current;
+        const scrollHeight = this.nodeHeights[idx];
+        elt.scrollTop = scrollHeight;
     }
 
     onScroll() {
@@ -94,14 +104,9 @@ class Scroller extends Component {
         } = this.props;
 
         const elt = this.containerRef.current;
-        this.nodeHeights = _.reduce(elt.childNodes, (acc, node, idx) => {
-            if (idx <= 1 || idx === elt.childNodes.length - 1) {
-                return acc;
-            }
-            const lastNodeHeight = _.last(acc) || 0;
-            acc.push(lastNodeHeight + node.scrollHeight);
-            return acc;
-        }, [0]);
+        this.updateNodeHeights();
+
+        console.log(elt.scrollTop);
 
         const activeIndex = _.findLastIndex(this.nodeHeights, height => elt.scrollTop >= height);
 
@@ -125,7 +130,7 @@ class Scroller extends Component {
                         <Item
                             key={idx}
                             active={idx === activeIndex}
-                            onClick={this.onClick}
+                            onClick={() => this.onClick(idx)}
                         >{elt.name}</Item>
                     )) }
                     <div></div>
