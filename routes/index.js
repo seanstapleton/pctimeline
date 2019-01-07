@@ -11,7 +11,7 @@ const {
   getVideoThumbnail
 } = require('./utilities/utilities');
 
-const dbx = new Dropbox({ accessToken: 'b31IOz_iVoAAAAAAAAAAwkfekfZhZ0jq9U_zThq1v0TbCGoOMpIiKRPExvgO4kQJ', fetch: fetch });
+const dbx = new Dropbox({ accessToken: process.env.dropbox_access_token, fetch: fetch });
 const router = express.Router();
 
 const movies = ['mp4', 'mov'];
