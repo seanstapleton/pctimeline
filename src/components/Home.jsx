@@ -38,7 +38,7 @@ class Home extends Component {
         super(props);
 
         this.state = {
-            activeGallery: 0,
+            activeGallery: -1,
             galleries: [],
             images: [],
             allImagesLoaded: false,
@@ -63,36 +63,38 @@ class Home extends Component {
         image.src = galleries[0].header;
     }
 
-    async updateActiveGallery(activeGallery) {
-        this.setState({ activeGallery });
-        const { galleries } = this.state;
-        const activeGalleryName = galleries[activeGallery].name;
-        this.setState({
-            allImagesLoaded: false,
-            images: []
-        });
-        if (activeGalleryName) {
-            const response = await axios.get(`/backendServices/photos/${activeGalleryName}`);
-            const images = _.map(response.data, image => ({
-                src: image.src,
-                thumbnail: image.thumbnail,
-                w: image.width,
-                h: image.height
-            }));
+    async updateActiveGallery(activeGalleryIn) {
+        const { activeGallery } = this.state;
+        if (activeGalleryIn !== activeGallery) {
+            this.setState({ activeGallery: activeGalleryIn });
+            const { galleries } = this.state;
+            const activeGalleryName = galleries[activeGalleryIn].name;
             this.setState({
                 allImagesLoaded: false,
-                images
+                images: []
             });
-            this.numLoadedImages = 0;
+            if (activeGalleryName) {
+                const response = await axios.get(`/backendServices/photos/${activeGalleryName}`);
+                const images = _.map(response.data, image => ({
+                    src: image.src,
+                    thumbnail: image.thumbnail,
+                    w: image.width,
+                    h: image.height
+                }));
+                this.setState({
+                    allImagesLoaded: false,
+                    images
+                });
+                this.numLoadedImages = 0;
+            }
         }
     }
 
     incrementNumLoadedImages(elt) {
         this.numLoadedImages++;
         const allImagesLoaded = this.numLoadedImages >=  this.state.images.length;
-        console.log('All images loaded?', allImagesLoaded);
         if (allImagesLoaded) {
-        this.setState({ allImagesLoaded });
+            this.setState({ allImagesLoaded });
         }
     }
 

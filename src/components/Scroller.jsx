@@ -46,11 +46,13 @@ class Scroller extends Component {
         this.containerRef = React.createRef();
         this.state = {
             activeIndex: 0,
-            scrollHeight: 0,
-            nodeHeight: 40
+            scrollHeight: 0
         }
 
+        this.nodeHeights = [];
+
         this.onScroll = this.onScroll.bind(this);
+        this.onClick = this.onClick.bind(this);
     }
 
     componentDidMount() {
@@ -58,9 +60,15 @@ class Scroller extends Component {
         const beginningFillerNode = elt.childNodes[0];
         const endingFillerNode = elt.childNodes[elt.childNodes.length - 1];
 
-        global.test = elt.childNodes;
-        const nodeHeight = _.get(elt, 'childNodes[2].scrollHeight') || 40;
-        this.setState({ nodeHeight });
+        this.nodeHeights = _.reduce(elt.childNodes, (acc, node, idx) => {
+            if (idx <= 1 || idx === elt.childNodes.length - 1) {
+                return acc;
+            }
+            const lastNodeHeight = _.last(acc) || 0;
+            acc.push(lastNodeHeight + node.scrollHeight);
+            return acc;
+        }, [0]);
+        const nodeHeight = _.last(this.nodeHeights);
 
         elt.style['padding-right'] = '17px';
         const fillerHeight = (elt.scrollHeight/2 - nodeHeight);
@@ -75,21 +83,31 @@ class Scroller extends Component {
         elt.removeEventListener('scroll', this.onScroll);
     }
 
+    onClick(elt) {
+        console.log('elt:', elt.target.scrollTop);
+    }
+
     onScroll() {
         const {
             elts,
             onScrollStop
         } = this.props;
-        const { nodeHeight } = this.state;
 
         const elt = this.containerRef.current;
-        const activeIndex = Math.min(Math.floor(elt.scrollTop/nodeHeight), elts.length - 1);
-        const newNodeHeight = _.get(elt, 'childNodes[2].scrollHeight') || 40;
+        this.nodeHeights = _.reduce(elt.childNodes, (acc, node, idx) => {
+            if (idx <= 1 || idx === elt.childNodes.length - 1) {
+                return acc;
+            }
+            const lastNodeHeight = _.last(acc) || 0;
+            acc.push(lastNodeHeight + node.scrollHeight);
+            return acc;
+        }, [0]);
+
+        const activeIndex = _.findLastIndex(this.nodeHeights, height => elt.scrollTop >= height);
 
         this.setState({
             activeIndex,
-            scrollHeight: elt.scrollTop,
-            nodeHeight: newNodeHeight
+            scrollHeight: elt.scrollTop
         });
 
         clearTimeout(scrollTimeout);
@@ -103,7 +121,13 @@ class Scroller extends Component {
             <Wrapper>
                 <Container ref={this.containerRef}>
                     <div></div>
-                    { elts.map((elt, idx) => (<Item key={idx} active={idx === activeIndex}>{elt.name}</Item>)) }
+                    { elts.map((elt, idx) => (
+                        <Item
+                            key={idx}
+                            active={idx === activeIndex}
+                            onClick={this.onClick}
+                        >{elt.name}</Item>
+                    )) }
                     <div></div>
                 </Container>
             </Wrapper>
