@@ -4,10 +4,11 @@ import Dropzone from 'react-dropzone';
 import styled from 'styled-components';
 import axios from 'axios';
 import _ from 'lodash';
-import Swal from 'sweetalert2';
 import { Line } from 'rc-progress';
 
+import ImagePreview from './ImagePreview';
 import Header from './Header';
+import { asyncSetState } from '../utilities/react-utilities';
 
 const ImageDropzoneContainer = styled.div`
     width: calc(90% - 40px);
@@ -28,17 +29,7 @@ const ImagePreviewWindow = styled.div`
     min-height: 150px;
     position: relative;
 `;
-const ImagePreview = styled.img`
-    width: calc(50% - 10px);
-    padding: 5px;
-    border-radius: 5px;
-    float: left;
-    image-orientation: from-image;
-    
-    @media (min-width: 768px) {
-        width: calc(33% - 15px);
-    }
-`;
+
 const VideoDefault = styled.div`
     display: block;
     position: relative;
@@ -156,12 +147,14 @@ class UploadPage extends Component {
             chosenGallery:  '',
             galleries: [],
             images: [],
-            loadingProgress: false
+            loadingProgress: false,
+            uploading: false
         };
         this.onDrop = this.onDrop.bind(this);
         this.onSelectChange = this.onSelectChange.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
         this.clearFiles = this.clearFiles.bind(this);
+        this.asyncSetState = asyncSetState.bind(this);
     }
 
     async componentDidMount() {
@@ -178,7 +171,6 @@ class UploadPage extends Component {
     }
 
     onSelectChange(e) {
-        console.log('value', e.target.value);
         this.setState({ chosenGallery: e.target.value });
     }
 
@@ -187,29 +179,55 @@ class UploadPage extends Component {
             chosenGallery,
             images
         } = this.state;
-        const imageData = new FormData();
-        _.forEach(images, (image, idx) => {
-            const file = image.file;
-            imageData.append(file.name, file);
+
+        // partition images 
+        const imagesPartition = _.partition(images, image => image.uploadPercent > 0);
+        const imagesToUpload = imagesPartition[1];
+
+        await this.asyncSetState({
+            uploading: true,
+            images: imagesToUpload
         });
-        this.setState({ loadingProgress: "0" });
-        setTimeout(() => this.setState({ loadingProgress: "15" }), 500);
-        const response = await axios.post(`/backendServices/photos/${chosenGallery}`, imageData);
-        this.setState({ loadingProgress: "100" });
-        setTimeout(() => this.setState({ loadingProgress: false }), 500);
-        if (response.data.success) {
-            this.setState({ images: [] });
-        } else {
-            console.log(response);
-            await Swal({
-                title: 'Error',
-                text: response.data.err,
-                type: 'error'
-            });
-        }
+
+        // upload images in parallel
+        const imageUploads = _.map(imagesToUpload, (image, idx) =>
+            new Promise( async (resolve) => {
+                const imageData = new FormData();
+                imageData.append(image.file.name, image.file);
+                let response;
+                try {
+                    response = await axios.post(`/backendServices/photos/${chosenGallery}`, imageData, {
+                        onUploadProgress: (evt) => {
+                            if (evt.lengthComputable) {
+                                this.setState(state => {
+                                    const newImages = _.cloneDeep(state.images);
+                                    newImages[idx].uploadPercent = 0.5*(evt.loaded/evt.total);
+                                    return { images: newImages };
+                                });
+                            }
+                        }
+                    });
+                } catch (e) {
+                    console.log(e);
+                }
+                const success = _.get(response, 'data.success');
+                this.setState((state) => {
+                    const newImages = _.cloneDeep(state.images);
+                    newImages[idx].uploadPercent = 1;
+                    newImages[idx].success = success;
+                    return { images: newImages };
+                });
+                resolve(response);
+            }));
+
+        Promise.all(imageUploads).then((results) => {
+            console.log('done!');
+            this.setState({ uploading: false });
+        });
     }
 
     onDrop(newImages) {
+        this.setState({ uploadDisabled: false });
         _.forEach(newImages, (file, idx) => {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -218,7 +236,8 @@ class UploadPage extends Component {
                     const images = state.images;
                     const newImage = {
                         file: newImages[idx],
-                        preview: fileAsBinaryString
+                        preview: fileAsBinaryString,
+                        uploadPercent: 0
                     };
                     images.push(newImage);
                     return { images };
@@ -236,17 +255,18 @@ class UploadPage extends Component {
             chosenGallery,
             galleries,
             images,
-            loadingProgress
+            loadingProgress,
+            uploading
         } = this.state;
         return (
-            <div style={{ height: '100vh', background: 'url(https://dl.dropboxusercontent.com/s/4eu6ifskfc44d0j/collage.jpg) repeat', backgroundSize: 'cover' }}>
+            <div style={{ height: '100vh', backgroundColor: '#BD9CDB' }}>
                 <Header />
                 <Dropzone onDrop={this.onDrop}>
                     { ({getRootProps, getInputProps, isDragActive}) => (
                         <ImageDropzoneContainer className={classNames('dropzone', {'dropzone-active': isDragActive})}>
                             <QueueActionsContainer>
-                                <button {...getRootProps()}>Add files</button>
-                                <button onClick={this.clearFiles}>Clear files</button>
+                                <button {...getRootProps()} disabled={uploading}>Add files</button>
+                                <button onClick={this.clearFiles} disabled={uploading}>Clear files</button>
                             </QueueActionsContainer>
                             <input {...getInputProps()} />
                             <ImagePreviewWindow {...getRootProps()} onClick={() => {}}>
@@ -264,11 +284,10 @@ class UploadPage extends Component {
                                         ? (<DropText>Try dropping some files here or click 'Add files' to select files to upload.</DropText>)
                                         : _.map(images, image => {
                                             const { type } = image.file;
-                                            console.log(type);
                                             if (_.includes(type, 'video')) {
                                                 return (<VideoDefault><p>{image.file.name}</p></VideoDefault>);
                                             }
-                                            return (<ImagePreview src={image.preview} />)
+                                            return (<ImagePreview src={image.preview} percent={image.uploadPercent} success={image.success} />)
                                         })
                                 }
                             </ImagePreviewWindow>
@@ -279,7 +298,7 @@ class UploadPage extends Component {
                                         <option value={gallery.name}>{gallery.name}</option>
                                     ))}
                                 </select>
-                                <button onClick={this.onSubmit} disabled={images.length === 0}>Upload Images</button>
+                                <button onClick={this.onSubmit} disabled={uploading || images.length === 0}>Upload Images</button>
                             </UploadForm>
                         </ImageDropzoneContainer>
                     )}

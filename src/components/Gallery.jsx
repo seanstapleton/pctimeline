@@ -70,7 +70,6 @@ class Gallery extends Component {
             incrementNumLoadedImages,
             images
         } = this.props;
-        console.log(images);
         return (
             <div style={{ padding: 20 }}>
                 { allImagesLoaded

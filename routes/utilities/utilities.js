@@ -32,7 +32,6 @@ const getVideoThumbnail = (path) =>
   new Promise((resolve, reject) => {
     // create temporary directory
     const tmpobj = tmp.dirSync();
-    console.log('Dir: ', tmpobj.name);
 
     // Manual cleanup
     tmpobj.removeCallback();

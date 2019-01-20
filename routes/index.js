@@ -85,13 +85,11 @@ module.exports = (db) => {
       }
       const files = _.values(filesIn);
       for (const file of files) {
-        console.log('FILE:', file);
         try {
           // get file extension
           const fileName = file[0].originalFilename.toLowerCase().match(/.+(?=.(jpg|jpeg|png|mp4|mov))/g)[0];
           const fileExtensionRegEx = new RegExp(`(?<=${fileName}\.).+`, 'g');
           const fileExtension = file[0].originalFilename.toLowerCase().match(fileExtensionRegEx)[0];
-          console.log('file extension:', fileExtension);
 
           if (_.includes(movies, fileExtension)) {
             // file is a video
@@ -102,10 +100,7 @@ module.exports = (db) => {
             const tn = await jimp.read(thumbnail);
             const { width, height } = tn.bitmap;
 
-            console.log('movies:', movies);
-            console.log(fileExtension);
             const sourceIdx = _.findIndex(movies, elt => elt === fileExtension);
-            console.log('source index:', sourceIdx);
             const thumbnailDBPath = `/galleries/${req.params.id}/thumbnails/${fileName}_th${sourceIdx}_${width}x${height}.png`;
             
             // upload files
@@ -146,6 +141,5 @@ module.exports = (db) => {
       return res.send({ success: true });
     });
   });
-
   return router;
 };

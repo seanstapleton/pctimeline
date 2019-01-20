@@ -106,8 +106,6 @@ class Scroller extends Component {
         const elt = this.containerRef.current;
         this.updateNodeHeights();
 
-        console.log(elt.scrollTop);
-
         const activeIndex = _.findLastIndex(this.nodeHeights, height => elt.scrollTop >= height);
 
         this.setState({
