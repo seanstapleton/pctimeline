@@ -82,7 +82,10 @@ class LoginPage extends Component {
             <Container>
             <LoginBox>
                 <p>PCTimeline</p>
-                <form onSubmit={() => onLogin(password)}>
+                <form onSubmit={(e) => {
+                    onLogin(password);
+                    e.preventDefault();
+                }}>
                     <InputBox type='password' placeholder='password' onChange={this.onPasswordChange} />
                     <LoginButton type='submit'>Login</LoginButton>
                 </form>

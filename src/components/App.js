@@ -24,8 +24,14 @@ class App extends Component {
   }
 
   async onLogin(password) {
-    const response = await axios.post('/backendServices/login', { id: 'pctumich', password });
-    this.setState({ authed: _.get(response, 'data.success') });
+    let response;
+    try {
+      response = await axios.post('/backendServices/login', { id: 'pctumich', password });
+    } catch (e) {
+      console.log(e);
+    }
+    const success = _.get(response, 'data.success');
+    this.setState({ authed: success });
   }
 
   render() {
