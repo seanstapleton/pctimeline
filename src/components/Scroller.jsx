@@ -14,7 +14,7 @@ const Wrapper = styled.div`
 
 const Container = styled.div`
     width: 80vw;
-    height: calc(80vh - 200px);
+    height: calc(60vh - 200px);
     margin-top: 10vh;
     overflow: auto;
 
@@ -114,7 +114,10 @@ class Scroller extends Component {
         });
 
         clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => onScrollStop(activeIndex), 500);
+        scrollTimeout = setTimeout(() => {
+            this.onClick(activeIndex);
+            onScrollStop(activeIndex)
+        }, 500);
     }
 
     render() {

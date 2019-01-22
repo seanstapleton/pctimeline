@@ -24,7 +24,7 @@ const ImageBox = styled.img`
 const LoadingBox = styled.div`
     position: absolute;
     width: 100%;
-    height: calc(100% - 2.5px);
+    height: 100%;
     top: 0;
     left: 0;
     border-radius: 5px;
@@ -64,12 +64,38 @@ const PercentContainer = styled.div`
     align-items: center;
 `;
 
+const VideoDefault = styled.div`
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 200px;
+    border-radius: 5px;
+    float: left;
+    background-color: #aec3db;
+    background-image: url(/video.svg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 25%;
+
+    & p {
+        margin: 0;
+        position: absolute;
+        bottom: 5px;
+        font-family: 'Just Another Hand';
+        font-size: 2em;
+        text-align: center;
+        width: calc(100% - 10px);
+    }
+`;
+
 class Gallery extends Component {
     render() {
         const {
+            filename,
             percent,
             src,
-            success
+            success,
+            video
         } = this.props;
 
         return (
@@ -90,7 +116,11 @@ class Gallery extends Component {
                         ) : ''
                     }
                 </LoadingBox>
-                <ImageBox src={src} />
+                {
+                    video
+                        ? (<VideoDefault><p>{filename}</p></VideoDefault>)
+                        : (<ImageBox src={src} />)
+                }
             </PreviewContainer>
         );
     }

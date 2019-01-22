@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import 'react-photoswipe/lib/photoswipe.css';
 import PhotoSwipe from 'react-photoswipe';
@@ -36,6 +37,12 @@ const GridSizer = styled.div`
 const LoaderContainer = styled.div`
     width: 64px;
     margin: 0 auto;
+`;
+
+const Placeholder = styled.p`
+    font-family: 'Open Sans';
+    text-align: center;
+    margin-top: 20px;
 `;
 
 class Gallery extends Component {
@@ -76,20 +83,27 @@ class Gallery extends Component {
                     ? null
                     : <LoaderContainer><ReactLoading type='bubbles' color='#222' /></LoaderContainer>
                 }
-                <Masonry options={{ columnWidth: '.grid-sizer', gutter: 15 }}>
-                    <GridSizer className='grid-sizer'></GridSizer>
-                    { _.map(images, (elt, idx) => (
-                        <Image 
-                            key={idx}
-                            src={elt.thumbnail}
-                            onClick={() => this.onThumbnailClick(idx)}
-                            onLoad={() => {
-                                if (!allImagesLoaded) incrementNumLoadedImages(elt)
-                            }}
-                        />
-                    )) }
-                </Masonry>
-                <PhotoSwipe isOpen={lightboxOpen} options={{ index: lightboxIndex }} items={images} onClose={this.onLightboxClose} />
+                {
+                    images.length
+                        ? (
+                            <div>
+                                <Masonry options={{ columnWidth: '.grid-sizer', gutter: 15 }}>
+                                    <GridSizer className='grid-sizer'></GridSizer>
+                                    { _.map(images, (elt, idx) => (
+                                        <Image 
+                                            key={idx}
+                                            src={elt.thumbnail}
+                                            onClick={() => this.onThumbnailClick(idx)}
+                                            onLoad={() => {
+                                                if (!allImagesLoaded) incrementNumLoadedImages(elt)
+                                            }}
+                                        />
+                                    )) }
+                                </Masonry>
+                                <PhotoSwipe isOpen={lightboxOpen} options={{ index: lightboxIndex }} items={images} onClose={this.onLightboxClose} />
+                            </div>
+                        ) : (allImagesLoaded) ? (<Placeholder>No photos have been added to this album yet. <Link to='/upload'>Add some!</Link></Placeholder>) : null
+                }
             </div>
         );
     }

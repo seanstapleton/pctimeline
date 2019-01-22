@@ -6,7 +6,6 @@ import Header from './Header';
 import Scroller from './Scroller';
 
 const Container = styled.div`
-    background-color: #fff;
     background: ${props => `url(${props.background}) center center no-repeat`};
     background-size: cover;
     width: 100vw;
@@ -35,13 +34,15 @@ class Landing extends Component {
         const activeBackground = _.get(galleries, `[${activeGallery}].header`);
 
         return (
-            <Container background={activeBackground}>
-                <Header />
-                <Scroller
-                    elts={galleries}
-                    onScrollStop={this.onScrollStop}
-                />
-            </Container>
+            <div style={{ backgroundColor: '#E7CEE8' }}>
+                <Container background={activeBackground}>
+                    <Header />
+                    <Scroller
+                        elts={galleries}
+                        onScrollStop={this.onScrollStop}
+                    />
+                </Container>
+            </div>
         );
     }
 }

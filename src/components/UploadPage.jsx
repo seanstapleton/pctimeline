@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import axios from 'axios';
 import _ from 'lodash';
 import { Line } from 'rc-progress';
+import { Redirect } from 'react-router-dom';
 
 import ImagePreview from './ImagePreview';
 import Header from './Header';
@@ -158,12 +159,15 @@ class UploadPage extends Component {
     }
 
     async componentDidMount() {
-        const response = await axios.get('/backendServices/galleries');
-        const galleries = response.data;
-        this.setState({
-            chosenGallery: galleries[0].name,
-            galleries
-        });
+        const { authed } = this.props;
+        if (authed) {
+            const response = await axios.get('/backendServices/galleries');
+            const galleries = _.reverse(response.data);
+            this.setState({
+                chosenGallery: galleries[0].name,
+                galleries
+            });
+        }
     }
 
     clearFiles() {
@@ -258,6 +262,10 @@ class UploadPage extends Component {
             loadingProgress,
             uploading
         } = this.state;
+        const { authed } = this.props;
+        if (!authed) {
+            return (<Redirect to='/login' />);
+        }
         return (
             <div style={{ height: '100vh', backgroundColor: '#BD9CDB' }}>
                 <Header />
@@ -284,10 +292,15 @@ class UploadPage extends Component {
                                         ? (<DropText>Try dropping some files here or click 'Add files' to select files to upload.</DropText>)
                                         : _.map(images, image => {
                                             const { type } = image.file;
-                                            if (_.includes(type, 'video')) {
-                                                return (<VideoDefault><p>{image.file.name}</p></VideoDefault>);
-                                            }
-                                            return (<ImagePreview src={image.preview} percent={image.uploadPercent} success={image.success} />)
+                                            return (
+                                                <ImagePreview
+                                                    src={image.preview}
+                                                    percent={image.uploadPercent}
+                                                    success={image.success}
+                                                    video={_.includes(type, 'video')}
+                                                    filename={image.file.name}
+                                                />
+                                            )
                                         })
                                 }
                             </ImagePreviewWindow>

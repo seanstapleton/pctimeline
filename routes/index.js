@@ -17,7 +17,7 @@ const router = express.Router();
 const movies = ['mp4', 'mov'];
 const photos = ['jpg', 'jpeg', 'png'];
 
-module.exports = (db) => {
+module.exports = (db, passport) => {
   router.get('/galleries', async (req, res) => {
     const response = await dbx.filesListFolder({ path: '/galleries' });
     const { entries } = response;
@@ -31,7 +31,15 @@ module.exports = (db) => {
   router.get('/photos/:id', async (req, res) => {
     // get thumbnails
     const thumbnailsPath = `/galleries/${req.params.id}/thumbnails`;
-    const response = await dbx.filesListFolder({ path: thumbnailsPath });
+    let response;
+    try {
+      response = await dbx.filesListFolder({ path: thumbnailsPath });
+    } catch(e) {
+      console.log(e.message);
+    }
+    if (!response) {
+      return res.send();
+    }
     const { entries } = response;
     const thumbnails = _.filter(entries, entry => entry['.tag'] === 'file');
 
@@ -141,5 +149,39 @@ module.exports = (db) => {
       return res.send({ success: true });
     });
   });
+
+  // Passport login methods
+  const isLoggedIn = (req, res) => {
+    if (req.isAuthenticated()) res.send({ loggedIn: true });
+    else res.send({ loggedIn: false });
+  };
+
+  router.get('/isLoggedIn', (req, res, next) => isLoggedIn(req, res, next));
+
+  router.post('/login', (req, res, next) => {
+    passport.authenticate('login', (err, user) => {
+      if (err) {
+        console.log(`error: ${err}`);
+        return next(err);
+      }
+      if (!user) {
+        console.log('error user');
+        return res.send({ success: false, err });
+      }
+      req.login(user, (loginErr) => {
+        console.log(user, loginErr);
+        if (loginErr) {
+          return next(loginErr);
+        }
+        res.send({ success: true });
+      });
+    })(req, res, next);
+  });
+
+  router.get('/logout', (req, res) => {
+    req.logout();
+    res.end();
+  });
+
   return router;
 };

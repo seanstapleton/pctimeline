@@ -5,6 +5,7 @@ import Landing from './Landing';
 import Gallery from './Gallery';
 import styled from 'styled-components';
 import ReactLoading from 'react-loading';
+import { Redirect } from 'react-router-dom';
 
 const ImagePreloader = styled.div`
     position: absolute;
@@ -50,17 +51,26 @@ class Home extends Component {
 
         this.updateActiveGallery = this.updateActiveGallery.bind(this);
         this.incrementNumLoadedImages = this.incrementNumLoadedImages.bind(this);
+        this.updateImagesLoaded = this.updateImagesLoaded.bind(this);
     }
 
     async componentDidMount() {
-        const response = await axios.get('/backendServices/galleries');
-        const galleries = response.data;
-        this.setState({ galleries });
-        await this.updateActiveGallery(0);
+        const { authed } = this.props;
+        if (authed) {
+            const response = await axios.get('/backendServices/galleries');
+            const galleries = _.reverse(response.data);
 
-        const image = new Image();
-        image.onload = () => { setTimeout(() => this.setState({ loading: false }), 200); };
-        image.src = galleries[0].header;
+            this.setState({ galleries });
+            await this.updateActiveGallery(0);
+
+            if (galleries[0].header) {
+                const image = new Image();
+                image.onload = () => { setTimeout(() => this.setState({ loading: false }), 200); };
+                image.src = galleries[0].header;
+            } else {
+                this.setState({ loading: false });
+            }
+        }
     }
 
     async updateActiveGallery(activeGalleryIn) {
@@ -78,7 +88,7 @@ class Home extends Component {
                 const images = _.map(response.data, image => {
                     const elt = { thumbnail: image.thumbnail };
                     if (image.movie) {
-                        elt.html = `<div class="wrapper"><div class="video-wrapper"><video width="960" class="pswp__video" src="${image.src}" controls></video></div></div>`;
+                        elt.html = `<div class="wrapper"><div class="video-wrapper"><video class="pswp__video" src="${image.src}" controls></video></div></div>`;
                     } else {
                         elt.src = image.src;
                         elt.w = image.width;
@@ -89,19 +99,25 @@ class Home extends Component {
                 });
                 this.setState({
                     allImagesLoaded: false,
-                    images
+                    images: images || []
                 });
                 this.numLoadedImages = 0;
+
+                setTimeout(this.updateImagesLoaded, 1000);
             }
+        }
+    }
+
+    updateImagesLoaded() {
+        const allImagesLoaded = this.numLoadedImages >=  this.state.images.length;
+        if (allImagesLoaded) {
+            this.setState({ allImagesLoaded });
         }
     }
 
     incrementNumLoadedImages(elt) {
         this.numLoadedImages++;
-        const allImagesLoaded = this.numLoadedImages >=  this.state.images.length;
-        if (allImagesLoaded) {
-            this.setState({ allImagesLoaded });
-        }
+        this.updateImagesLoaded();
     }
 
     render() {
@@ -112,7 +128,12 @@ class Home extends Component {
             images,
             loading
         } = this.state;
+        const { authed } = this.props;
         const activeGalleryName = _.get(galleries, `[${activeGallery}].name`);
+
+        if (!authed) {
+            return (<Redirect to='/login' />);
+        }
         return (
             <div>
                 <LoadingScreen show={loading}>

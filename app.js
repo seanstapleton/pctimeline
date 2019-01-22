@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const flash = require('connect-flash');
 const session = require('express-session');
 const bodyParser = require('body-parser');
+const passport = require('passport');
 
 const routes = require('./routes');
 
@@ -24,10 +25,14 @@ module.exports = (db) => {
     resave: true,
     saveUninitialized: true,
   }));
+  app.use(passport.initialize());
+  app.use(passport.session());
   app.use(flash());
 
+  require('./passport/config.js')(passport); // eslint-disable-line global-require
+
   app.use(express.static(path.join(__dirname, 'build')));
-  app.use('/backendServices', routes(db));
+  app.use('/backendServices', routes(db, passport));
   app.get('/*', function(req, res) {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
   });
