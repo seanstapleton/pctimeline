@@ -115,7 +115,6 @@ class Scroller extends Component {
 
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
-            this.onClick(activeIndex);
             onScrollStop(activeIndex)
         }, 500);
     }

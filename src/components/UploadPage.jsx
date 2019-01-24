@@ -151,6 +151,9 @@ class UploadPage extends Component {
             loadingProgress: false,
             uploading: false
         };
+
+        this.signal = axios.CancelToken.source();
+
         this.onDrop = this.onDrop.bind(this);
         this.onSelectChange = this.onSelectChange.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
@@ -161,13 +164,19 @@ class UploadPage extends Component {
     async componentDidMount() {
         const { authed } = this.props;
         if (authed) {
-            const response = await axios.get('/backendServices/galleries');
+            const response = await axios.get('/backendServices/galleries', {
+                cancelToken: this.signal.token
+            });
             const galleries = _.reverse(response.data);
             this.setState({
                 chosenGallery: galleries[0].name,
                 galleries
             });
         }
+    }
+
+    componentWillUnmount() {
+        this.signal.cancel('HTTP calls are being canceled');
     }
 
     clearFiles() {
@@ -209,7 +218,8 @@ class UploadPage extends Component {
                                     return { images: newImages };
                                 });
                             }
-                        }
+                        },
+                        cancelToken: this.signal.token
                     });
                 } catch (e) {
                     console.log(e);
@@ -262,8 +272,12 @@ class UploadPage extends Component {
             loadingProgress,
             uploading
         } = this.state;
-        const { authed } = this.props;
+        const {
+            authed,
+            setReturnRoute
+        } = this.props;
         if (!authed) {
+            setReturnRoute('/upload');
             return (<Redirect to='/login' />);
         }
         return (

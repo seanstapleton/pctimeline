@@ -3,18 +3,53 @@ const tmp = require('tmp');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegPath);
+const fs = require('fs');
+const jimp = require('jimp');
+
+const movies = ['mp4', 'mov'];
+const photos = ['jpg', 'jpeg', 'png'];
+
+const getFilesInFolder = async (dbx, path) => {
+  const data = await dbx.filesListFolder({ path });
+  return _.filter(data.entries, entry => entry['.tag'] === 'file');
+};
+
+const getSourceLinksFromThumbnailNames = (dbx, thumbnails, gallery) => {
+  return _.map(thumbnails, (thumbnail, idx) => {
+    const thName = thumbnail.name.toLowerCase();
+
+    // get source information
+    let srcName = thName.match(/.+(?=_[0-9]+x[0-9]+\.(jpg|jpeg|png))/g)[0];
+    let srcExtension = thName.match(/(?<=[0-9]+x[0-9]+\.)(jpg|jpeg|png)/g)[0];
+
+    // if screenshot, get video
+    if (srcExtension === 'png') {
+      let srcIdx = (thName.match(/(?<=_th)[0-9](?=_[0-9]+x[0-9]+\.)/g) || ["-1"])[0];
+      srcIdx = parseInt(srcIdx);
+      if (srcIdx > -1) {
+        srcExtension = movies[srcIdx];
+        srcName = thName.match(/.+(?=_th[0-9]_[0-9]+x[0-9]+\.(jpg|jpeg|png))/g)[0]
+      }
+    }
+
+    // finalize information
+    thumbnails[idx].srcExtension = srcExtension;
+    const srcPath = `/galleries/${gallery}/${srcName}.${srcExtension}`;
+    
+    // return Promise to be executed asynchronously
+    return dbx.filesGetTemporaryLink({ path: srcPath });
+  });
+};
 
 const getGalleriesInformation = async (dbx, folders) => {
     const galleries = [];
 
     for (const folder of folders) {
-      const files = await dbx.filesListFolder({ path: folder.path_lower });
-      const images = _.filter(files.entries, entry => entry['.tag'] === 'file');
+      const files = await getFilesInFolder(dbx, folder.path_lower);
 
-      let headerImage = images[0];
+      const headerImage = _.find(files,  file => _.includes(file.name, 'header')) || _.first(files);
       let headerImgSrc = { link: '' };
 
-      headerImage = _.find(images,  image => _.includes(image.name, 'header')) || headerImage;
       if (headerImage) {
         headerImgSrc = await dbx.filesGetTemporaryLink({ path: headerImage.path_lower });
       }
@@ -46,7 +81,87 @@ const getVideoThumbnail = (path) =>
     }, tmpobj.name);
   });
 
+const getImagesArrayFromThumbnailsAndSourceLinks = (thumbnails, thumbnailLinks, srcLinks) =>
+  _.map(thumbnails, (thumbnail, idx) => {
+    const name = thumbnail.name;
+    const [width, height] = name.match(/(?<=_)[0-9]+x[0-9]+(?=\.)/g)[0].split('x');
+    const thumbnailLink = thumbnailLinks[idx].link;
+    const srcLink = srcLinks[idx].link;
+
+    return {
+      thumbnail: thumbnailLink,
+      src: srcLink,
+      width,
+      height,
+      movie: _.includes(movies, thumbnail.srcExtension)
+    };
+  });
+
+const asyncParseForm = (form, req) =>
+  new Promise((resolve, reject) => {
+    form.parse(req, (err, fields, filesIn) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve([fields, filesIn]);
+      }
+    });
+  });
+
+const getFileExtension = (filename) => {
+  const name = filename.toLowerCase().match(/.+(?=.(jpg|jpeg|png|mp4|mov))/g)[0];
+  const extensionRegEx = new RegExp(`(?<=${name}\.).+`, 'g');
+  const extension = filename.toLowerCase().match(extensionRegEx)[0];
+  return [name, extension];
+};
+
+const uploadVideo = async (dbx, file, path, filename) => {
+  const thumbnailPath = await getVideoThumbnail(file[0].path);
+  const thumbnail = fs.readFileSync(thumbnailPath);
+  const movie = fs.readFileSync(file[0].path);
+
+  const tn = await jimp.read(thumbnail);
+  const { width, height } = tn.bitmap;
+
+  const sourceIdx = _.findIndex(movies, elt => elt === fileExtension);
+  const thumbnailDBPath = `${path}/thumbnails/${filename}_th${sourceIdx}_${width}x${height}.png`;
+
+  // upload files
+  await dbx.filesUpload({ path: thumbnailDBPath, contents: thumbnail });
+  await dbx.filesUpload({ path: `${path}/${file[0].originalFilename}`, contents: movie });
+};
+
+const uploadPhoto = async (dbx, file, path) => {
+  let image = await jimp.read(file[0].path);
+  const [filename, fileExtension] = getFileExtension(file[0].originalFilename);
+  const { width, height } = image.bitmap;
+  let mimeType = (fileExtension === 'jpg') ? 'JPEG' : fileExtension;
+  mimeType = jimp[`MIME_${mimeType.toUpperCase()}`];
+
+  // get dropbox file paths 
+  const thumbnailPath = `${path}/thumbnails/${filename}_${width}x${height}.${fileExtension}`;
+  const filePath = `${path}/${filename}.${fileExtension}`;
+
+  // create buffers
+  const targetHeight = 400;
+  const resizeRatio = targetHeight/height
+  const imageBuffer = await image.getBufferAsync(mimeType); 
+  const resized = image.scale(resizeRatio);
+  const thumbnailBuffer = await resized.getBufferAsync(mimeType);
+
+  // upload photos
+  await dbx.filesUpload({ path: filePath, contents: imageBuffer });
+  await dbx.filesUpload({ path: thumbnailPath, contents: thumbnailBuffer });
+};
+
 module.exports = {
+  asyncParseForm,
+  getFileExtension,
+  getFilesInFolder,
   getGalleriesInformation,
-  getVideoThumbnail
+  getVideoThumbnail,
+  getSourceLinksFromThumbnailNames,
+  getImagesArrayFromThumbnailsAndSourceLinks,
+  uploadPhoto,
+  uploadVideo
 };

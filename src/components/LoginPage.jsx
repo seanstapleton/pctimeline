@@ -71,11 +71,12 @@ class LoginPage extends Component {
         const { password } = this.state;
         const {
             authed,
-            onLogin
+            onLogin,
+            returnRoute
         } = this.props;
 
         if (authed) {
-            return (<Redirect to='/' />)
+            return (<Redirect to={returnRoute || '/'} />)
         }
 
         return (

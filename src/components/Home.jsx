@@ -48,6 +48,7 @@ class Home extends Component {
 
         this.numLoadedImages = 0;
         this.show = false;
+        this.signal = axios.CancelToken.source();
 
         this.updateActiveGallery = this.updateActiveGallery.bind(this);
         this.incrementNumLoadedImages = this.incrementNumLoadedImages.bind(this);
@@ -57,7 +58,9 @@ class Home extends Component {
     async componentDidMount() {
         const { authed } = this.props;
         if (authed) {
-            const response = await axios.get('/backendServices/galleries');
+            const response = await axios.get('/backendServices/galleries', {
+                cancelToken: this.signal.token
+            });
             const galleries = _.reverse(response.data);
 
             this.setState({ galleries });
@@ -73,6 +76,10 @@ class Home extends Component {
         }
     }
 
+    componentWillUnmount() {
+        this.signal.cancel('HTTP calls are being canceled');
+    }
+
     async updateActiveGallery(activeGalleryIn) {
         const { activeGallery } = this.state;
         if (activeGalleryIn !== activeGallery) {
@@ -84,7 +91,9 @@ class Home extends Component {
                 images: []
             });
             if (activeGalleryName) {
-                const response = await axios.get(`/backendServices/photos/${activeGalleryName}`);
+                const response = await axios.get(`/backendServices/photos/${activeGalleryName}`, {
+                    cancelToken: this.signal.token
+                });
                 const images = _.map(response.data, image => {
                     const elt = { thumbnail: image.thumbnail };
                     if (image.movie) {
