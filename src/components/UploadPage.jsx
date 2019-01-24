@@ -214,7 +214,22 @@ class UploadPage extends Component {
                             if (evt.lengthComputable) {
                                 this.setState(state => {
                                     const newImages = _.cloneDeep(state.images);
-                                    newImages[idx].uploadPercent = 0.5*(evt.loaded/evt.total);
+                                    const uploadPercent = evt.loaded/evt.total;
+                                    console.log('percent:', uploadPercent);
+                                    if (uploadPercent < 1) {
+                                        newImages[idx].uploadPercent = (0.5*(uploadPercent)).toFixed(2);
+                                    } else {
+                                        const rand = _.random(0.5,0.8);
+                                        newImages[idx].uploadPercent = rand.toFixed(2);
+                                    }
+                                    // else if (!newImages[idx].timeouts) {
+                                    //     console.log('yo');
+                                    //     newImages[idx].uploadPercent = (0.5*(uploadPercent)).toFixed(2);
+                                    //     newImages[idx].timeouts = _.map(_.range(5), rangeValue => setTimeout(() => {
+                                    //         const updateRatio = _.random(0.05,0.099);
+                                    //         newImages[idx].uploadPercent = 0.5 + 0.09*rangeValue;
+                                    //     }, (rangeValue+1)*1000));
+                                    // }
                                     return { images: newImages };
                                 });
                             }
@@ -227,6 +242,7 @@ class UploadPage extends Component {
                 const success = _.get(response, 'data.success');
                 this.setState((state) => {
                     const newImages = _.cloneDeep(state.images);
+                    _.forEach(newImages[idx].timeouts, timeout => clearTimeout(timeout));
                     newImages[idx].uploadPercent = 1;
                     newImages[idx].success = success;
                     return { images: newImages };

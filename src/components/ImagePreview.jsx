@@ -8,9 +8,13 @@ const PreviewContainer = styled.div`
     border-radius: 5px;
     float: left;
     position: relative;
+    margin-left: 10px;
+    margin-bottom: 10px;
     
     @media (min-width: 768px) {
         width: calc(33% - 15px);
+        margin-left: 15px
+        margin-bottom: 15px;
     }
 `;
 
@@ -97,6 +101,8 @@ class Gallery extends Component {
             success,
             video
         } = this.props;
+
+        console.log(percent);
 
         return (
             <PreviewContainer>

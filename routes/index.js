@@ -72,9 +72,9 @@ module.exports = (db, passport) => {
         const [filename, fileExtension] = getFileExtension(file[0].originalFilename);
 
         if (_.includes(movies, fileExtension)) {
-          await uploadVideo(dbx, file, path, filename);
+          await uploadVideo(dbx, file, path, filename, fileExtension);
         } else if (_.includes(photos, fileExtension)) {
-          await uploadPhoto(dbx, file, path, filename);
+          await uploadPhoto(dbx, file, path, filename, fileExtension);
         } else {
           // file format is not accepted
           return res.sendFile({ success: false, err: `${fileExtension} file format not accepted`});

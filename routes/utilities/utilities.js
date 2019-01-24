@@ -4,7 +4,8 @@ const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegPath);
 const fs = require('fs');
-const jimp = require('jimp');
+const sharp = require('sharp');
+const exifParser = require('exif-parser');
 
 const movies = ['mp4', 'mov'];
 const photos = ['jpg', 'jpeg', 'png'];
@@ -115,43 +116,35 @@ const getFileExtension = (filename) => {
   return [name, extension];
 };
 
-const uploadVideo = async (dbx, file, path, filename) => {
+const uploadVideo = async (dbx, file, path, filename, fileExtension) => {
   const thumbnailPath = await getVideoThumbnail(file[0].path);
-  const thumbnail = fs.readFileSync(thumbnailPath);
-  const movie = fs.readFileSync(file[0].path);
+  const movieBuffer = fs.readFileSync(file[0].path);
 
-  const tn = await jimp.read(thumbnail);
-  const { width, height } = tn.bitmap;
+  const thumbnail = await sharp(thumbnailPath).rotate().toBuffer({ resolveWithObject: true });
+  const { width, height } = thumbnail.info;
 
   const sourceIdx = _.findIndex(movies, elt => elt === fileExtension);
   const thumbnailDBPath = `${path}/thumbnails/${filename}_th${sourceIdx}_${width}x${height}.png`;
 
   // upload files
-  await dbx.filesUpload({ path: thumbnailDBPath, contents: thumbnail });
-  await dbx.filesUpload({ path: `${path}/${file[0].originalFilename}`, contents: movie });
+  await dbx.filesUpload({ path: thumbnailDBPath, contents: thumbnail.data });
+  await dbx.filesUpload({ path: `${path}/${file[0].originalFilename}`, contents: movieBuffer });
 };
 
-const uploadPhoto = async (dbx, file, path) => {
-  let image = await jimp.read(file[0].path);
-  const [filename, fileExtension] = getFileExtension(file[0].originalFilename);
-  const { width, height } = image.bitmap;
-  let mimeType = (fileExtension === 'jpg') ? 'JPEG' : fileExtension;
-  mimeType = jimp[`MIME_${mimeType.toUpperCase()}`];
+const uploadPhoto = async (dbx, file, path, filename, fileExtension) => {
+  const sharpInstance = sharp(file[0].path);
+  const imageBuffer = await sharpInstance.rotate().toBuffer({ resolveWithObject: true });
+  const thumbnailBuffer = await sharpInstance.rotate().resize({ height: 400 }).toBuffer({ resolveWithObject: true });
+  
+  const { width, height } = imageBuffer.info;
 
   // get dropbox file paths 
   const thumbnailPath = `${path}/thumbnails/${filename}_${width}x${height}.${fileExtension}`;
   const filePath = `${path}/${filename}.${fileExtension}`;
 
-  // create buffers
-  const targetHeight = 400;
-  const resizeRatio = targetHeight/height
-  const imageBuffer = await image.getBufferAsync(mimeType); 
-  const resized = image.scale(resizeRatio);
-  const thumbnailBuffer = await resized.getBufferAsync(mimeType);
-
   // upload photos
-  await dbx.filesUpload({ path: filePath, contents: imageBuffer });
-  await dbx.filesUpload({ path: thumbnailPath, contents: thumbnailBuffer });
+  await dbx.filesUpload({ path: filePath, contents: imageBuffer.data });
+  await dbx.filesUpload({ path: thumbnailPath, contents: thumbnailBuffer.data });
 };
 
 module.exports = {
