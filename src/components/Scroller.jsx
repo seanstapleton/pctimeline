@@ -2,24 +2,31 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import _ from 'lodash';
 
-const Wrapper = styled.div`
-    width: 80vw;
-    margin-left: 10vw;
-    overflow: hidden;
-
+const MaxWidthContainer = styled.div`
+    width: 90vw;
+    margin: 0 auto;
+    max-width: 1000px;
     @media (min-width: 768px) {
-        width: 60vw;
+        width: 80vw;
+    }
+    overflow: hidden;
+    margin-top: 5vh;
+`;
+
+const Wrapper = styled.div`
+    width: 70vh;
+    @media (min-width: 768px) {
+        width: 40vh;
     }
 `;
 
 const Container = styled.div`
-    width: 80vw;
+    width: 70vh;
     height: calc(60vh - 200px);
-    margin-top: 10vh;
     overflow: auto;
 
     @media (min-width: 768px) {
-        width: 60vw;
+        width: 40vh;
         height: calc(60vh - 200px);
     }
 `;
@@ -123,19 +130,21 @@ class Scroller extends Component {
         const { elts } = this.props;
         const { activeIndex } = this.state;
         return (
-            <Wrapper>
-                <Container ref={this.containerRef}>
-                    <div></div>
-                    { elts.map((elt, idx) => (
-                        <Item
-                            key={idx}
-                            active={idx === activeIndex}
-                            onClick={() => this.onClick(idx)}
-                        >{elt.name}</Item>
-                    )) }
-                    <div></div>
-                </Container>
-            </Wrapper>
+            <MaxWidthContainer>
+                <Wrapper>
+                    <Container ref={this.containerRef}>
+                        <div></div>
+                        { elts.map((elt, idx) => (
+                            <Item
+                                key={idx}
+                                active={idx === activeIndex}
+                                onClick={() => this.onClick(idx)}
+                            >{elt.name}</Item>
+                        )) }
+                        <div></div>
+                    </Container>
+                </Wrapper>
+            </MaxWidthContainer>
         );
     }
 }

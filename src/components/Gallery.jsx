@@ -7,6 +7,11 @@ import ReactLoading from 'react-loading';
 import Masonry from 'react-masonry-component';
 import _ from 'lodash';
 
+const MaxSizeContainer = styled.div`
+    padding: 15px;
+    max-width: 1000px;
+    margin: 0 auto;
+`;
 const Image = styled.img`
     width: calc(50% - 7.5px);
     margin-bottom: 15px;
@@ -78,7 +83,7 @@ class Gallery extends Component {
             images
         } = this.props;
         return (
-            <div style={{ padding: 20 }}>
+            <MaxSizeContainer>
                 { allImagesLoaded
                     ? null
                     : <LoaderContainer><ReactLoading type='bubbles' color='#222' /></LoaderContainer>
@@ -104,7 +109,7 @@ class Gallery extends Component {
                             </div>
                         ) : (allImagesLoaded) ? (<Placeholder>No photos have been added to this album yet. <Link to='/upload'>Add some!</Link></Placeholder>) : null
                 }
-            </div>
+            </MaxSizeContainer>
         );
     }
 }

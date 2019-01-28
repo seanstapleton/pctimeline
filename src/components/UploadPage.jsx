@@ -12,14 +12,19 @@ import Header from './Header';
 import { asyncSetState } from '../utilities/react-utilities';
 
 const ImageDropzoneContainer = styled.div`
-    width: calc(90% - 40px);
-    margin: 5%;
+    width: calc(90vw - 40px);
+    margin: 5vh auto;
+    max-width: 960px;
     padding: 20px;
     background-color: #ddd;
     opacity: 0.98;
     border-radius: 5px;
     & *:focus {
         outline: 0;
+    }
+
+    @media(min-width: 768px) {
+        width: calc(80vw - 40px);
     }
 `;
 const ImagePreviewWindow = styled.div`
