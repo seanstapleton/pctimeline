@@ -9,24 +9,28 @@ const MaxWidthContainer = styled.div`
     @media (min-width: 768px) {
         width: 80vw;
     }
-    overflow: hidden;
     margin-top: 5vh;
 `;
 
 const Wrapper = styled.div`
-    width: 70vh;
+    width: 70vw;
+    max-width: 300px;
+    overflow: hidden;
+
     @media (min-width: 768px) {
-        width: 40vh;
+        width: 40vw;
     }
 `;
 
 const Container = styled.div`
-    width: 70vh;
+    width: 70vw;
+    max-width: 300px;
     height: calc(60vh - 200px);
     overflow: auto;
+    padding-right: 17px;
 
     @media (min-width: 768px) {
-        width: 40vh;
+        width: 40vw;
         height: calc(60vh - 200px);
     }
 `;
@@ -83,7 +87,6 @@ class Scroller extends Component {
         this.updateNodeHeights();
         const nodeHeight = _.last(this.nodeHeights);
 
-        elt.style['padding-right'] = '17px';
         const fillerHeight = (elt.scrollHeight/2 - nodeHeight);
         beginningFillerNode.style.height = fillerHeight + 'px';
         endingFillerNode.style.height = fillerHeight + nodeHeight + 'px';

@@ -9,8 +9,13 @@ import _ from 'lodash';
 
 const MaxSizeContainer = styled.div`
     padding: 15px;
+    width: calc(100vw - 30px);
     max-width: 1000px;
     margin: 0 auto;
+
+    @media(min-width: 768px) {
+        width: calc(80vw - 30px);
+    }
 `;
 const Image = styled.img`
     width: calc(50% - 7.5px);
@@ -18,14 +23,8 @@ const Image = styled.img`
     cursor: pointer;
     margin-right: 0;
 
-    @media (max-width: 768px) {
-        &:not(:nth-child(2n+1)) {
-            margin-right: 15px;
-        }
-    }
-
     @media (min-width: 768px) {
-        width: calc(33% - 7.5px);
+        width: calc(33% -  10px);
         &:not(:nth-child(3n+1)) {
             margin-right: 15px;
         }
@@ -35,7 +34,7 @@ const GridSizer = styled.div`
     width: calc(50% - 7.5px);
 
     @media (min-width: 768px) {
-        width: calc(33% - 7.5px);
+        width: calc(33% - 10px);
     }
 `;
 
