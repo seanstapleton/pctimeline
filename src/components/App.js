@@ -6,6 +6,7 @@ import _ from 'lodash';
 import Home from './Home';
 import UploadPage from './UploadPage';
 import LoginPage from './LoginPage';
+import swal from 'sweetalert2';
 
 class App extends Component {
   constructor(props) {
@@ -49,6 +50,9 @@ class App extends Component {
       console.log(e);
     }
     const success = _.get(response, 'data.success');
+    if (!success) {
+      swal('Incorrect password', '', 'error');
+    }
     this.setState({ authed: success });
   }
 
