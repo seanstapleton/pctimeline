@@ -14,7 +14,7 @@ const MaxWidthContainer = styled.div`
 
 const Wrapper = styled.div`
     width: 70vw;
-    max-width: 300px;
+    max-width: 700px;
     overflow: hidden;
 
     @media (min-width: 768px) {
@@ -24,8 +24,8 @@ const Wrapper = styled.div`
 
 const Container = styled.div`
     width: 70vw;
-    max-width: 300px;
-    height: calc(60vh - 200px);
+    max-width: 700px;
+    height: calc(80vh - 200px);
     overflow: auto;
     padding-right: 17px;
 
@@ -37,7 +37,7 @@ const Container = styled.div`
 
 const Item = styled.div`
     font-family: 'Just Another Hand';
-    font-size: ${props => props.active ? '3em' : '2em'};
+    font-size: ${props => props.active ? '2.5em' : '2em'};
     color: ${props => props.active ? '#fff' : '#555'};
     transition: font-size 0.5s ease-out, line-height 0.5s ease-out;
     cursor: pointer;
@@ -85,7 +85,8 @@ class Scroller extends Component {
         const endingFillerNode = elt.childNodes[elt.childNodes.length - 1];
 
         this.updateNodeHeights();
-        const nodeHeight = _.last(this.nodeHeights);
+        const nodeHeight = _.last(this.nodeHeights) || 40;
+        this.fillerNodeHeight = nodeHeight;
 
         const fillerHeight = (elt.scrollHeight/2 - nodeHeight);
         beginningFillerNode.style.height = fillerHeight + 'px';
@@ -116,7 +117,7 @@ class Scroller extends Component {
         const elt = this.containerRef.current;
         this.updateNodeHeights();
 
-        const activeIndex = _.findLastIndex(this.nodeHeights, height => elt.scrollTop >= height);
+        const activeIndex = _.findLastIndex(this.nodeHeights, height => elt.scrollTop >= height - this.fillerNodeHeight);
 
         this.setState({
             activeIndex,
