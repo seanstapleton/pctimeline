@@ -7,6 +7,11 @@ import styled from 'styled-components';
 import ReactLoading from 'react-loading';
 import { Redirect } from 'react-router-dom';
 
+const PaperBackground = styled.div`
+    background-image: url('/paper.png');
+    background-size: 10%;
+`;
+
 const ImagePreloader = styled.div`
     position: absolute;
     width: 0;
@@ -144,7 +149,7 @@ class Home extends Component {
             return (<Redirect to='/login' />);
         }
         return (
-            <div>
+            <PaperBackground>
                 <LoadingScreen show={loading}>
                     <ReactLoadingContainer>
                         <ReactLoading type='spin' color='#222' />
@@ -158,7 +163,7 @@ class Home extends Component {
                     incrementNumLoadedImages={this.incrementNumLoadedImages}
                     allImagesLoaded={allImagesLoaded}
                 />
-            </div>
+            </PaperBackground>
         );
     }
 }

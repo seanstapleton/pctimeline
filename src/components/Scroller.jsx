@@ -18,7 +18,7 @@ const Wrapper = styled.div`
     overflow: hidden;
 
     @media (min-width: 768px) {
-        width: 40vw;
+        width: 60vw;
     }
 `;
 
@@ -30,7 +30,7 @@ const Container = styled.div`
     padding-right: 17px;
 
     @media (min-width: 768px) {
-        width: 40vw;
+        width: 60vw;
         height: calc(60vh - 200px);
     }
 `;
