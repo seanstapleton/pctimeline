@@ -23,6 +23,18 @@ const ImageDropzoneContainer = styled.div`
         outline: 0;
     }
 
+    @media(min-width: 768px) {
+        width: calc(80vw - 40px);
+    }
+`;
+const ImagePreviewWindow = styled.div`
+    background-color: #eee;
+    padding: 20px;
+    border-radius: 5px;
+    overflow-x: auto;
+    min-height: 150px;
+    position: relative;
+
     & div {
         margin-bottom: 10px;
     }
@@ -34,20 +46,10 @@ const ImageDropzoneContainer = styled.div`
     }
 
     @media(min-width: 768px) {
-        width: calc(80vw - 40px);
-
         & div:not(:nth-child(3n)) {
             margin-right: 15px;
         }
     }
-`;
-const ImagePreviewWindow = styled.div`
-    background-color: #eee;
-    padding: 20px;
-    border-radius: 5px;
-    overflow-x: auto;
-    min-height: 150px;
-    position: relative;
 `;
 
 const VideoDefault = styled.div`
