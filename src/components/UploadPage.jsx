@@ -23,8 +23,22 @@ const ImageDropzoneContainer = styled.div`
         outline: 0;
     }
 
+    & div {
+        margin-bottom: 10px;
+    }
+
+    @media(max-width: 768px) {
+        & div:not(:nth-child(2n)) {
+            margin-right: 15px;
+        }
+    }
+
     @media(min-width: 768px) {
         width: calc(80vw - 40px);
+
+        & div:not(:nth-child(3n)) {
+            margin-right: 15px;
+        }
     }
 `;
 const ImagePreviewWindow = styled.div`
@@ -39,7 +53,7 @@ const ImagePreviewWindow = styled.div`
 const VideoDefault = styled.div`
     display: block;
     position: relative;
-    width: calc(50% - 10px);
+    width: calc(50% - 15px);
     height: 200px;
     padding: 5px;
     border-radius: 5px;
@@ -313,15 +327,6 @@ class UploadPage extends Component {
                             </QueueActionsContainer>
                             <input {...getInputProps()} />
                             <ImagePreviewWindow {...getRootProps()} onClick={() => {}}>
-                                {
-                                    loadingProgress
-                                        ? ( <Line
-                                            percent={loadingProgress}
-                                            strokeWidth="1"
-                                            strokeColor="#63BCFF"
-                                            style={loadingBarStyles}
-                                        />) : null
-                                }
                                 { 
                                     (images.length === 0)
                                         ? (<DropText>Try dropping some files here or click 'Add files' to select files to upload.</DropText>)

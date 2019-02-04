@@ -10,7 +10,7 @@ const PreviewContainer = styled.div`
     position: relative;
     
     @media (min-width: 768px) {
-        width: calc(33% - 15px);
+        width: calc(33% - 10px);
     }
 `;
 
