@@ -128,7 +128,7 @@ const uploadVideo = async (dbx, file, path, filename, fileExtension) => {
 
   // upload files
   await dbx.filesUpload({ path: thumbnailDBPath, contents: thumbnail.data });
-  await dbx.filesUpload({ path: `${path}/${file[0].originalFilename}`, contents: movieBuffer });
+  await dbx.filesUpload({ path: `${path}/${filename}.${fileExtension}`, contents: movieBuffer });
 };
 
 const uploadPhoto = async (dbx, file, path, filename, fileExtension) => {
