@@ -61,6 +61,32 @@ module.exports = (db, passport) => {
     }
   });
 
+  router.post('/form/:id', async (req, res) => {
+    try {
+      const path = `/forms/${req.params.id}`;
+      const form = new multiparty.Form();
+      const [fields, filesIn] = await asyncParseForm(form, req);
+      const files = _.values(filesIn);
+      for (const file of files) {
+        // get file extension
+        const [filename, fileExtension] = getFileExtension(file[0].originalFilename);
+
+        if (_.includes(movies, fileExtension)) {
+          await uploadVideo(dbx, file, path, filename, fileExtension);
+        } else if (_.includes(photos, fileExtension)) {
+          await uploadPhoto(dbx, file, path, filename, fileExtension);
+        } else {
+          // file format is not accepted
+          return res.sendFile({ success: false, err: `${fileExtension} file format not accepted`});
+        }
+      }
+      return res.send({ success: true });
+    } catch (e) {
+      console.log(e.message);
+      return res.send({ success: false, err: e.message });
+    }
+  });
+
   router.post('/photos/:id', async (req, res) => {
     try {
       const path = `/galleries/${req.params.id}`;

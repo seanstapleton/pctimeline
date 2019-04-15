@@ -1,16 +1,19 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { Circle } from 'rc-progress';
+import { Player } from 'video-react';
+import '../../node_modules/video-react/dist/video-react.css';
+
 import _ from 'lodash';
 
 const PreviewContainer = styled.div`
-    width: calc(50% - 10px);
+    width: ${props => !props.full ? 'calc(50% - 10px)' : '100%'};
     border-radius: 5px;
     float: left;
     position: relative;
     
     @media (min-width: 768px) {
-        width: calc(33% - 10px);
+        width: ${props => !props.full ? 'calc(33% - 10px)' : '100%'};
     }
 `;
 
@@ -88,18 +91,19 @@ const VideoDefault = styled.div`
     }
 `;
 
-class Gallery extends Component {
+class ImagePreview extends Component {
     render() {
         const {
             filename,
             percent,
             src,
             success,
-            video
+            video,
+            full
         } = this.props;
 
         return (
-            <PreviewContainer>
+            <PreviewContainer full={full}>
                 <LoadingBox success={success} percent={percent}>
                     { (percent > 0 && percent < 1  && success === undefined)
                         ? (
@@ -118,7 +122,7 @@ class Gallery extends Component {
                 </LoadingBox>
                 {
                     video
-                        ? (<VideoDefault><p>{filename}</p></VideoDefault>)
+                        ? (<Player src={src} />)
                         : (<ImageBox src={src} />)
                 }
             </PreviewContainer>
@@ -126,4 +130,4 @@ class Gallery extends Component {
     }
 }
 
-export default Gallery;
+export default ImagePreview;

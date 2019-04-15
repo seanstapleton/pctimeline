@@ -5,6 +5,7 @@ import _ from 'lodash';
 
 import Home from './Home';
 import UploadPage from './UploadPage';
+import SeniorForm from './SeniorForm';
 import LoginPage from './LoginPage';
 import swal from 'sweetalert2';
 
@@ -67,6 +68,7 @@ class App extends Component {
         <div className="App">
           <Route exact path='/' render={props => <Home {...props} authed={authed} />} />
           <Route exact path='/upload' render={props => <UploadPage {...props} authed={authed} setReturnRoute={this.setReturnRoute} />} />
+          <Route exact path='/seniors' render={props => <SeniorForm {...props} authed={true} setReturnRoute={this.setReturnRoute} />} />
           <Route exact path='/login' render={props => <LoginPage {...props} authed={authed} onLogin={this.onLogin} returnRoute={returnRoute} />} />
         </div>
       </Router>

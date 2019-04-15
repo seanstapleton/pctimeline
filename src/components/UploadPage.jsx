@@ -341,6 +341,7 @@ class UploadPage extends Component {
                                                     success={image.success}
                                                     video={_.includes(type, 'video')}
                                                     filename={image.file.name}
+                                                    full={false}
                                                 />
                                             )
                                         })
