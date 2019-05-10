@@ -10,21 +10,27 @@ const exifParser = require('exif-parser');
 const movies = ['mp4', 'mov'];
 const photos = ['jpg', 'jpeg', 'png'];
 
+// Checks `path` in Dropbox and returns all items tagged as 'file'
 const getFilesInFolder = async (dbx, path) => {
   const data = await dbx.filesListFolder({ path });
   return _.filter(data.entries, entry => entry['.tag'] === 'file');
 };
 
+//
 const getSourceLinksFromThumbnailNames = (dbx, thumbnails, gallery) => {
   return _.map(thumbnails, (thumbnail, idx) => {
     const thName = thumbnail.name.toLowerCase();
 
-    // get source information
+    // Extracts the name of a file (e.g. some_image.png => some_image)
     let srcName = thName.match(/.+(?=_[0-9]+x[0-9]+\.(jpg|jpeg|png))/g)[0];
+
+    // Extracts the extension from a filename (e.g. some_image.png => png)
     let srcExtension = thName.match(/(?<=[0-9]+x[0-9]+\.)(jpg|jpeg|png)/g)[0];
 
     // if screenshot, get video
     if (srcExtension === 'png') {
+      // Screenshot thumbnails are stored in the format `<name>_th<video extension index>_<width>x<height>.png
+      // Check if filename follows that pattern
       let srcIdx = (thName.match(/(?<=_th)[0-9](?=_[0-9]+x[0-9]+\.)/g) || ["-1"])[0];
       srcIdx = parseInt(srcIdx);
       if (srcIdx > -1) {
@@ -33,7 +39,6 @@ const getSourceLinksFromThumbnailNames = (dbx, thumbnails, gallery) => {
       }
     }
 
-    // finalize information
     thumbnails[idx].srcExtension = srcExtension;
     const srcPath = `/galleries/${gallery}/${srcName}.${srcExtension}`;
     
@@ -42,6 +47,16 @@ const getSourceLinksFromThumbnailNames = (dbx, thumbnails, gallery) => {
   });
 };
 
+/*
+  Input:
+    dbx - instance of Dropbox object
+    folders - list of galleries to search 
+  Output:
+    List of gallery objects each with properties
+      name - gallery name
+      path_lower - path to gallery in the Dropbox folder in all lowercase
+      link - URL to the gallery header, if it exists
+*/
 const getGalleriesInformation = async (dbx, folders) => {
     const galleries = [];
 
